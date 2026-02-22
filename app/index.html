@@ -50,6 +50,20 @@ header{border-bottom:1px solid #1e1e2a;padding-bottom:16px;margin-bottom:28px;di
 .calc-btn:hover:not(:disabled){background:#ffd966}
 .calc-btn:disabled{background:#1a1a24;color:#333;cursor:not-allowed}
 
+/* route option selector */
+.route-opts-wrap{display:none}
+.route-opts-wrap.visible{display:block}
+.route-opts-label{font-size:11px;font-weight:600;color:#666;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px}
+.route-opts{display:flex;flex-direction:column;gap:6px}
+.route-opt{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#0d0d10;border:1px solid #222230;border-radius:6px;cursor:pointer;transition:border-color .15s,background .15s}
+.route-opt:hover{background:#13131a;border-color:#333}
+.route-opt.selected{border-color:#f5c842;background:#13110a}
+.route-opt input[type=radio]{accent-color:#f5c842;width:15px;height:15px;flex-shrink:0;cursor:pointer}
+.route-opt-name{font-size:13px;font-weight:600;color:#e8e4dc;flex:1}
+.route-opt-nm{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#f5c842;white-space:nowrap}
+.route-opt-warn{font-size:10px;color:#e07820;background:#1a1200;border:1px solid #2e2000;padding:2px 6px;border-radius:3px;white-space:nowrap}
+
+
 /* ── hero bar ── */
 .hero-bar{background:#111118;border:1px solid #1e1e2a;border-radius:10px;padding:20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
 .hero-item .val{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:#f5c842}
@@ -161,6 +175,14 @@ header{border-bottom:1px solid #1e1e2a;padding-bottom:16px;margin-bottom:28px;di
     </div>
 
     <button class="calc-btn" id="calcBtn" onclick="doCalc()" disabled>CALCULATE FREIGHT</button>
+
+    <!-- Route options — shown once both ports are selected -->
+    <div class="route-opts-wrap" id="routeOptsWrap">
+      <div class="route-opts-label">Select Route</div>
+      <div class="route-opts" id="routeOptsList"></div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn2" onclick="doCalc()" disabled style="display:none">CALCULATE FREIGHT</button>
   </div>
 
   <!-- RESULTS -->
@@ -811,13 +833,139 @@ function routedDistance(pA,pB){
 }
 
 // ══════════════════════════════════════════════════
-// INITIAL COMPUTE (determines routing + defaults)
+// ROUTE OPTIONS
+// Returns all realistic routes for a port pair,
+// with distances and war zone flags.
+// Used to populate the route selector UI.
 // ══════════════════════════════════════════════════
-function compute(lp,dp,cargoMt){
-  const vr=vesselForCargo(cargoMt);
-  const sp=VESSEL_SPECS[vr.v];
-  const tcMatch=matchTC(lp.region,dp.region,vr.v);
-  const {nm,canals,warZones,routeDesc}=routedDistance(lp,dp);
+function routeOptions(pA, pB){
+  const zA = routeZone(pA), zB = routeZone(pB);
+  const rA = pA.region||'', rB = pB.region||'';
+  const either = set => set.includes(zA) || set.includes(zB);
+  const pair   = (a,b) => (zA===a&&zB===b)||(zA===b&&zB===a);
+
+  const capeNm = () => Math.round((haversine(pA.lat,pA.lon,WP.cape.lat,WP.cape.lon)+haversine(WP.cape.lat,WP.cape.lon,pB.lat,pB.lon))*1.10);
+  const panNm  = () => Math.round((haversine(pA.lat,pA.lon,WP.panama.lat,WP.panama.lon)+haversine(WP.panama.lat,WP.panama.lon,pB.lat,pB.lon))*1.04);
+  const suezNm = () => distViaSuez(pA, pB, zA, zB);
+
+  const opts = [];
+
+  // ─ Atlantic Americas ↔ Pacific Americas → Panama + Cape ─
+  if(pair('ATL_AMER','PAC_AMER')){
+    opts.push({key:'panama', label:'Via Panama Canal',        nm:panNm(),  canals:['panama'], warZones:[]});
+    opts.push({key:'cape',   label:'Via Cape of Good Hope',   nm:capeNm(), canals:[],         warZones:[]});
+  }
+  // ─ Europe/Med/Black/W.Africa ↔ Indian or Asia → Suez + Cape ─
+  else if((either(['EUR_MED','BLACK','W_AFRICA']) && either(['INDIAN','ASIA']))){
+    const s = suezNm(), c = capeNm();
+    const suezWar = [];
+    if(!['W.INDIA','E.INDIA','S.INDIA','MIDDLE EAST'].includes(rA) &&
+       !['W.INDIA','E.INDIA','S.INDIA','MIDDLE EAST'].includes(rB)){
+      suezWar.push('redsea'); // transits Red Sea
+    }
+    if(rA==='RED SEA'||rB==='RED SEA') suezWar.push('redsea');
+    opts.push({key:'suez',  label:'Via Suez Canal',          nm:s, canals:['suez'], warZones:[...new Set(suezWar)]});
+    opts.push({key:'cape',  label:'Via Cape of Good Hope',   nm:c, canals:[],       warZones:[]});
+  }
+  // ─ Atlantic Americas ↔ Asia → Panama + Cape ─
+  else if(pair('ATL_AMER','ASIA')){
+    opts.push({key:'panama', label:'Via Panama Canal',        nm:panNm(),  canals:['panama'], warZones:[]});
+    opts.push({key:'cape',   label:'Via Cape of Good Hope',   nm:capeNm(), canals:[],         warZones:[]});
+  }
+  // ─ Atlantic Americas ↔ Indian → Suez + Cape ─
+  else if(pair('ATL_AMER','INDIAN') || pair('ATL_AMER','W_AFRICA')){
+    const s = Math.round((haversine(pA.lat,pA.lon,WP.suez.lat,WP.suez.lon)+haversine(WP.suez.lat,WP.suez.lon,pB.lat,pB.lon))*1.05);
+    const c = capeNm();
+    opts.push({key:'suez',  label:'Via Suez Canal',          nm:s, canals:['suez'], warZones:['redsea']});
+    opts.push({key:'cape',  label:'Via Cape of Good Hope',   nm:c, canals:[],       warZones:[]});
+  }
+  // ─ All other routes → single direct option ─
+  else {
+    const {nm, canals, warZones, routeDesc} = routedDistance(pA, pB);
+    opts.push({key:'direct', label:routeDesc==='Direct'?'Direct sailing':routeDesc, nm, canals, warZones});
+  }
+
+  // Add Black Sea war zone to any route touching Black Sea
+  for(const o of opts){
+    if(rA==='BLACK SEA'||rB==='BLACK SEA'){
+      if(!o.warZones.includes('blacksea')) o.warZones.push('blacksea');
+    }
+  }
+
+  return opts;
+}
+
+// ── Build and show the route selector UI ───────────
+function updateRouteSelector(){
+  const lp = portSel.load, dp = portSel.disch;
+  const wrap = document.getElementById('routeOptsWrap');
+  const list = document.getElementById('routeOptsList');
+  const btn  = document.getElementById('calcBtn');
+  const btn2 = document.getElementById('calcBtn2');
+
+  if(!lp || !dp){
+    wrap.classList.remove('visible');
+    btn.style.display = 'block';
+    btn2.style.display = 'none';
+    return;
+  }
+
+  const opts = routeOptions(lp, dp);
+
+  // If only one option, no selector needed — just use it directly
+  if(opts.length <= 1){
+    wrap.classList.remove('visible');
+    btn.style.display = 'block';
+    btn2.style.display = 'none';
+    return;
+  }
+
+  // Multiple options — show selector, move button below it
+  btn.style.display  = 'none';
+  btn2.style.display = 'block';
+  wrap.classList.add('visible');
+
+  // Find currently selected key (preserve selection on port re-pick)
+  const currentKey = document.querySelector('.route-opt.selected')?.dataset?.key || opts[0].key;
+
+  list.innerHTML = opts.map((o, i) => {
+    const isSelected = o.key === currentKey || (currentKey === opts[0].key && i === 0 && !document.querySelector('.route-opt.selected'));
+    const warnHtml = o.warZones.includes('redsea')
+      ? '<span class="route-opt-warn">⚠ Red Sea war risk</span>' : '';
+    return `<label class="route-opt${isSelected?' selected':''}" data-key="${o.key}" onclick="selectRoute(this)">
+      <input type="radio" name="routeOpt" value="${o.key}"${isSelected?' checked':''}>
+      <span class="route-opt-name">${o.label}</span>
+      <span class="route-opt-nm">${o.nm.toLocaleString()} nm</span>
+      ${warnHtml}
+    </label>`;
+  }).join('');
+}
+
+function selectRoute(el){
+  document.querySelectorAll('.route-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+}
+
+// ── Get the currently selected route option ────────
+function getSelectedRoute(lp, dp){
+  const key = document.querySelector('.route-opt.selected')?.dataset?.key
+           || document.querySelector('.route-opt')?.dataset?.key;
+  const opts = routeOptions(lp, dp);
+  return opts.find(o => o.key === key) || opts[0];
+}
+
+
+function compute(lp, dp, cargoMt, routeOpt){
+  const vr = vesselForCargo(cargoMt);
+  const sp = VESSEL_SPECS[vr.v];
+  const tcMatch = matchTC(lp.region, dp.region, vr.v);
+  // Use the user-selected route if provided, otherwise auto-route
+  const route = routeOpt || routedDistance(lp, dp);
+  const nm        = route.nm;
+  const canals    = route.canals;
+  const warZones  = route.warZones;
+  const routeDesc = route.label || route.routeDesc || 'Direct';
   const canalCosts={};
   for(const c of canals) canalCosts[c]=(TOLLS[c]||{})[vr.v]||0;
   const warCosts={};
@@ -905,7 +1053,10 @@ function pickPort(wh,p){
   checkReady();
 }
 function checkReady(){
-  document.getElementById('calcBtn').disabled=!(portSel.load&&portSel.disch);
+  const ready = !!(portSel.load && portSel.disch);
+  document.getElementById('calcBtn').disabled  = !ready;
+  document.getElementById('calcBtn2').disabled = !ready;
+  updateRouteSelector();
 }
 function onCargoChange(){
   const mt=parseInt(document.getElementById('cargoMt').value)||50000;
@@ -936,7 +1087,9 @@ const Fn=n=>n.toLocaleString('en-US');
 function doCalc(){
   if(!portSel.load||!portSel.disch) return;
   const cargoMt=parseInt(document.getElementById('cargoMt').value)||50000;
-  const C=compute(portSel.load,portSel.disch,cargoMt);
+  // Get the user-selected route (or first option if selector not shown)
+  const routeOpt = getSelectedRoute(portSel.load, portSel.disch);
+  const C=compute(portSel.load, portSel.disch, cargoMt, routeOpt);
 
   // Build edit state with defaults from computed
   editState={
