@@ -516,6 +516,27 @@ let TOLLS        = {};
 let DEFAULT_BUNKER_PRICES = {vlsfo: 615, mgo: 870};
 
 // ══════════════════════════════════════════════════
+// VESSEL HELPERS
+// These use the globals populated by loadData()
+// ══════════════════════════════════════════════════
+function vesselForCargo(mt){
+  for(const v of VESSEL_RANGES) if(mt>=v.min && mt<=v.max) return v;
+  return VESSEL_RANGES[VESSEL_RANGES.length-1];
+}
+
+function matchTC(oR, dR, vt){
+  let best=null, bsc=0, bestF=null;
+  for(const f of FIXTURES){
+    let s=0;
+    if(f.oR===oR)s+=40; else if((RN[f.oR]||[]).includes(oR))s+=20; else if((RN[oR]||[]).includes(f.oR))s+=12;
+    if(f.dR===dR)s+=40; else if((RN[f.dR]||[]).includes(dR))s+=20; else if((RN[dR]||[]).includes(f.dR))s+=12;
+    if(f.vt===vt)s+=20; else s+=5;
+    if(s>bsc){bsc=s;best=f.rate;bestF=f;}
+  }
+  return {rate: best||15000, fixture: bestF};
+}
+
+// ══════════════════════════════════════════════════
 // DATA LOADER
 // Fetches all JSON files in parallel, then inits UI.
 // Falls back gracefully if a file fails.
