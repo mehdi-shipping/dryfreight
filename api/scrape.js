@@ -308,8 +308,9 @@ export default async function handler(req, res) {
   const auth = req.headers.authorization || '';
   const isVercelCron = req.headers['x-vercel-cron'] === '1';
   const isManual     = CRON_SECRET && auth === `Bearer ${CRON_SECRET}`;
+  const isQuery      = CRON_SECRET && req.query.secret === CRON_SECRET;
 
-  if (!isVercelCron && !isManual) {
+  if (!isVercelCron && !isManual && !isQuery) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
