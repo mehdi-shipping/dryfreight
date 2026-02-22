@@ -277,7 +277,11 @@ async function insertToSupabase(rows) {
 async function scrape() {
   // 1. Fetch HandyBulk
   const res = await fetch(SOURCE_URL, {
-    headers: { 'User-Agent': 'DryFreight-Bot/1.0 (data@dryfreight.com)' },
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5',
+    },
   });
   if (!res.ok) throw new Error(`Failed to fetch HandyBulk: ${res.status}`);
   const html = await res.text();
