@@ -4,74 +4,104 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>DryFreight Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0d0d10;color:#e8e4dc;font-family:'IBM Plex Sans',system-ui,sans-serif;min-height:100vh}
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@700&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
-/* layout */
-.wrap{max-width:860px;margin:0 auto;padding:24px 16px}
-header{border-bottom:1px solid #2a2a35;padding-bottom:16px;margin-bottom:28px;display:flex;align-items:baseline;gap:12px}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px}
+header{border-bottom:1px solid #1e1e2a;padding-bottom:16px;margin-bottom:28px;display:flex;align-items:baseline;gap:12px}
 .logo{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:22px;font-weight:700;color:#f5c842;letter-spacing:.5px}
-.logo span{color:#888;font-size:13px;font-weight:400;margin-left:4px}
+.logo span{color:#555;font-size:13px;font-weight:400;margin-left:4px}
 
-/* form */
-.form-card{background:#13131a;border:1px solid #22222e;border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:20px}
+/* ── form card ── */
+.form-card{background:#111118;border:1px solid #1e1e2a;border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:20px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.field label{display:block;font-size:11px;font-weight:600;color:#888;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+.field label{display:block;font-size:11px;font-weight:600;color:#666;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
 
 /* port search */
 .port-wrap{position:relative}
-.port-in{width:100%;background:#0d0d10;border:1px solid #2a2a35;border-radius:6px;padding:10px 12px;color:#e8e4dc;font-size:14px;outline:none;transition:border-color .15s}
+.port-in{width:100%;background:#0d0d10;border:1px solid #222230;border-radius:6px;padding:10px 12px;color:#e8e4dc;font-size:14px;outline:none;transition:border-color .15s}
 .port-in:focus{border-color:#f5c842}
-.port-in.chosen{border-color:#3a5a2a;color:#a8e090}
-.port-meta{font-size:11px;color:#666;margin-top:4px;min-height:16px}
-.dd{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;max-height:240px;overflow-y:auto;z-index:100;display:none}
+.port-in.chosen{border-color:#2a4a1a;color:#90d060}
+.port-meta{font-size:11px;color:#555;margin-top:4px;min-height:16px}
+.dd{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#16161f;border:1px solid #222230;border-radius:6px;max-height:220px;overflow-y:auto;z-index:100;display:none}
 .dd.open{display:block}
 .ddi{padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px}
-.ddi:hover{background:#22222e}
+.ddi:hover{background:#1e1e2a}
 .ddi-name{color:#e8e4dc}
-.ddi-meta{color:#666;font-size:11px;margin-left:6px}
-.ddi-tag{font-size:10px;color:#555;background:#1e1e28;padding:2px 6px;border-radius:3px}
+.ddi-meta{color:#555;font-size:11px;margin-left:6px}
+.ddi-tag{font-size:10px;color:#444;background:#1a1a24;padding:2px 6px;border-radius:3px}
 
-/* cargo input */
-.num-wrap{display:flex;align-items:center;background:#0d0d10;border:1px solid #2a2a35;border-radius:6px;overflow:hidden}
+/* cargo */
+.num-wrap{display:flex;align-items:center;background:#0d0d10;border:1px solid #222230;border-radius:6px;overflow:hidden}
 .num-in{flex:1;background:transparent;border:none;padding:10px 12px;color:#e8e4dc;font-size:14px;outline:none}
-.num-unit{padding:10px 12px;color:#666;font-size:13px;border-left:1px solid #22222e}
+.num-unit{padding:10px 12px;color:#555;font-size:13px;border-left:1px solid #1a1a24}
 
 /* vessel badge */
-.vessel-auto{background:#13131a;border:1px solid #2a2a35;border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.vessel-auto{background:#0d0d10;border:1px solid #1e1e2a;border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
 .va-name{font-size:14px;font-weight:600;color:#f5c842}
-.va-detail{font-size:11px;color:#666;margin-top:2px}
-.va-badge{font-size:10px;font-weight:700;color:#666;background:#1e1e28;padding:3px 7px;border-radius:3px;letter-spacing:.5px}
+.va-detail{font-size:11px;color:#555;margin-top:2px}
+.va-badge{font-size:10px;font-weight:700;color:#555;background:#1a1a24;padding:3px 7px;border-radius:3px;letter-spacing:.5px}
 
 /* calc button */
-.calc-btn{width:100%;padding:14px;background:#f5c842;color:#0d0d10;font-size:14px;font-weight:700;letter-spacing:1px;border:none;border-radius:6px;cursor:pointer;transition:background .15s}
+.calc-btn{width:100%;padding:14px;background:#f5c842;color:#0d0d10;font-size:13px;font-weight:700;letter-spacing:1.5px;border:none;border-radius:6px;cursor:pointer;transition:background .15s}
 .calc-btn:hover:not(:disabled){background:#ffd966}
-.calc-btn:disabled{background:#22222e;color:#444;cursor:not-allowed}
+.calc-btn:disabled{background:#1a1a24;color:#333;cursor:not-allowed}
 
-/* results */
-.results{margin-top:24px;display:none}
-.hero-bar{background:#13131a;border:1px solid #2a2a35;border-radius:10px;padding:20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
-.hero-item .val{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:#f5c842}
-.hero-item .lbl{font-size:11px;color:#666;margin-top:3px;text-transform:uppercase;letter-spacing:.6px}
-.route-info{font-size:12px;color:#666;text-align:center;margin-bottom:16px}
+/* ── hero bar ── */
+.hero-bar{background:#111118;border:1px solid #1e1e2a;border-radius:10px;padding:20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+.hero-item .val{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:#f5c842}
+.hero-item .lbl{font-size:11px;color:#555;margin-top:3px;text-transform:uppercase;letter-spacing:.6px}
 
-.breakdown{background:#13131a;border:1px solid #2a2a35;border-radius:10px;overflow:hidden}
-.bk-row{display:flex;align-items:center;padding:11px 20px;border-bottom:1px solid #1a1a22;font-size:13px}
-.bk-row:last-child{border-bottom:none}
-.bk-label{flex:1;color:#aaa}
-.bk-detail{color:#666;font-size:11px;margin-left:8px;flex:1}
-.bk-val{font-family:'IBM Plex Mono',monospace;font-size:13px;color:#e8e4dc;text-align:right;min-width:90px}
-.bk-row.total{background:#0f0f16;border-top:1px solid #2a2a35}
-.bk-row.total .bk-label{color:#e8e4dc;font-weight:600}
-.bk-row.total .bk-val{color:#f5c842;font-size:15px}
-.bk-row.permt{background:#0a0a10}
-.bk-row.permt .bk-val{color:#a8e090;font-size:14px}
+.route-badge{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.rbadge{font-size:11px;color:#666;background:#111118;border:1px solid #1e1e2a;padding:4px 10px;border-radius:20px}
+.rbadge.via{color:#f5c842;border-color:#2a2400}
 
-.warn{background:#1e1600;border:1px solid #3a2a00;border-radius:6px;padding:10px 14px;font-size:12px;color:#c8a030;margin-bottom:12px}
+.warn{background:#1a1200;border:1px solid #2e2000;border-radius:6px;padding:10px 14px;font-size:12px;color:#b88820;margin-bottom:12px}
 
-@media(max-width:600px){.row2{grid-template-columns:1fr}.hero-bar{grid-template-columns:1fr 1fr}}
+/* ── section cards ── */
+.sec-card{background:#111118;border:1px solid #1e1e2a;border-radius:10px;overflow:hidden;margin-bottom:10px}
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;cursor:pointer;user-select:none;transition:background .1s}
+.sec-hdr:hover{background:#161620}
+.sec-num{font-size:10px;font-weight:700;color:#444;letter-spacing:1px;margin-right:8px;text-transform:uppercase}
+.sec-title{font-size:13px;font-weight:600;color:#bbb;letter-spacing:.3px}
+.sec-total{font-family:'IBM Plex Mono',monospace;font-size:14px;color:#f5c842}
+.sec-chevron{color:#444;font-size:12px;margin-left:8px;transition:transform .2s}
+.sec-hdr.open .sec-chevron{transform:rotate(180deg)}
+.sec-body{border-top:1px solid #1a1a24;padding:16px 20px;display:none}
+.sec-body.open{display:block}
+
+/* param rows */
+.param-block{margin-bottom:16px}
+.param-block:last-child{margin-bottom:0}
+.param-block-title{font-size:10px;font-weight:700;color:#444;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1a1a24}
+.param-row{display:grid;grid-template-columns:180px 1fr auto;align-items:center;gap:10px;padding:5px 0}
+.param-lbl{font-size:12px;color:#777}
+.param-val-display{font-family:'IBM Plex Mono',monospace;font-size:13px;color:#e8e4dc}
+.param-note{font-size:11px;color:#444;font-style:italic;text-align:right}
+.param-row.derived .param-lbl{color:#555}
+.param-row.derived .param-val-display{color:#aaa}
+.param-row.subtotal-row{border-top:1px solid #1a1a24;margin-top:6px;padding-top:10px}
+.param-row.subtotal-row .param-lbl{color:#ccc;font-weight:600}
+.param-row.subtotal-row .param-val-display{color:#f5c842;font-size:14px}
+
+/* editable inline input */
+.p-inline{display:flex;align-items:center;gap:6px}
+.p-in{background:#0d0d10;border:1px solid #252535;border-radius:4px;padding:5px 8px;color:#e8e4dc;font-family:'IBM Plex Mono',monospace;font-size:13px;width:100px;outline:none;text-align:right;transition:border-color .15s}
+.p-in:focus{border-color:#f5c842;background:#0f0f15}
+.p-unit{font-size:11px;color:#555;white-space:nowrap}
+
+/* grand total */
+.grand-total{background:#0d0d10;border:1px solid #1e1e2a;border-radius:10px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.gt-label{font-size:13px;color:#888}
+.gt-val{font-family:'IBM Plex Mono',monospace;font-size:18px;color:#f5c842;font-weight:600}
+.gt-permt{font-family:'IBM Plex Mono',monospace;font-size:14px;color:#90d060}
+
+#results{margin-top:24px;display:none}
+
+@media(max-width:640px){.row2{grid-template-columns:1fr}.hero-bar{grid-template-columns:1fr 1fr}.param-row{grid-template-columns:140px 1fr}.param-note{display:none}}
 </style>
 </head>
 <body>
@@ -80,14 +110,14 @@ header{border-bottom:1px solid #2a2a35;padding-bottom:16px;margin-bottom:28px;di
     <div class="logo">DryFreight <span>Voyage Cost Calculator</span></div>
   </header>
 
+  <!-- INPUT FORM -->
   <div class="form-card">
     <div class="row2">
       <div class="field">
         <label>Load Port</label>
         <div class="port-wrap">
           <input class="port-in" id="loadSearch" placeholder="Search port…" autocomplete="off"
-            oninput="filterPorts('load',this.value)"
-            onfocus="openDD('load')" onblur="closeDD('load')">
+            oninput="filterPorts('load',this.value)" onfocus="openDD('load')" onblur="closeDD('load')">
           <div class="dd" id="loadDD"></div>
         </div>
         <div class="port-meta" id="loadMeta"></div>
@@ -96,47 +126,374 @@ header{border-bottom:1px solid #2a2a35;padding-bottom:16px;margin-bottom:28px;di
         <label>Discharge Port</label>
         <div class="port-wrap">
           <input class="port-in" id="dischSearch" placeholder="Search port…" autocomplete="off"
-            oninput="filterPorts('disch',this.value)"
-            onfocus="openDD('disch')" onblur="closeDD('disch')">
+            oninput="filterPorts('disch',this.value)" onfocus="openDD('disch')" onblur="closeDD('disch')">
           <div class="dd" id="dischDD"></div>
         </div>
         <div class="port-meta" id="dischMeta"></div>
       </div>
     </div>
 
-    <div class="field" style="max-width:220px">
-      <label>Cargo Quantity</label>
-      <div class="num-wrap">
-        <input class="num-in" id="cargoMt" type="number" value="50000" min="5000" max="200000" step="1000" oninput="onCargoChange()">
-        <span class="num-unit">MT</span>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Vessel (auto-selected)</label>
-      <div class="vessel-auto">
-        <div>
-          <div class="va-name" id="vaName">Ultramax</div>
-          <div class="va-detail" id="vaDetail">~61,000 DWT · 55k–65k MT</div>
+    <div class="row2">
+      <div class="field">
+        <label>Cargo Quantity</label>
+        <div class="num-wrap">
+          <input class="num-in" id="cargoMt" type="number" value="50000" min="5000" max="200000" step="1000" oninput="onCargoChange()">
+          <span class="num-unit">MT</span>
         </div>
-        <div class="va-badge">AUTO</div>
+      </div>
+      <div class="field">
+        <label>Vessel (auto-selected)</label>
+        <div class="vessel-auto">
+          <div>
+            <div class="va-name" id="vaName">Ultramax</div>
+            <div class="va-detail" id="vaDetail">~61,000 DWT · 55k–65k MT</div>
+          </div>
+          <div class="va-badge">AUTO</div>
+        </div>
       </div>
     </div>
 
     <button class="calc-btn" id="calcBtn" onclick="doCalc()" disabled>CALCULATE FREIGHT</button>
   </div>
 
-  <div class="results" id="results">
-    <div class="route-info" id="routeInfo"></div>
+  <!-- RESULTS -->
+  <div id="results">
     <div class="warn" id="warnBox" style="display:none"></div>
-    <div class="hero-bar" id="heroBar"></div>
-    <div class="breakdown" id="breakdown"></div>
-  </div>
-</div>
+
+    <!-- Hero -->
+    <div class="hero-bar">
+      <div class="hero-item">
+        <div class="val" id="o-permt">—</div>
+        <div class="lbl">$/MT</div>
+      </div>
+      <div class="hero-item">
+        <div class="val" id="o-total">—</div>
+        <div class="lbl">Total Voyage Cost</div>
+      </div>
+      <div class="hero-item">
+        <div class="val" id="o-days">—</div>
+        <div class="lbl" id="o-dayslbl">Total Days</div>
+      </div>
+    </div>
+
+    <!-- Route info -->
+    <div class="route-badge" id="routeBadges"></div>
+
+    <!-- Section 1: TC Hire -->
+    <div class="sec-card" id="sec1">
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div><span class="sec-num">01</span><span class="sec-title">TC Hire</span></div>
+        <div style="display:flex;align-items:center">
+          <span class="sec-total" id="o-hire">—</span>
+          <span class="sec-chevron">▼</span>
+        </div>
+      </div>
+      <div class="sec-body open">
+
+        <!-- Distance -->
+        <div class="param-block">
+          <div class="param-block-title">Distance &amp; Route</div>
+          <div class="param-row derived">
+            <span class="param-lbl">Distance</span>
+            <span class="param-val-display" id="o-nm">—</span>
+            <span class="param-note">Haversine + routing waypoints</span>
+          </div>
+          <div class="param-row derived">
+            <span class="param-lbl">Route</span>
+            <span class="param-val-display" id="o-routedetail">—</span>
+            <span class="param-note"></span>
+          </div>
+        </div>
+
+        <!-- TC Rate -->
+        <div class="param-block">
+          <div class="param-block-title">TC Rate</div>
+          <div class="param-row">
+            <span class="param-lbl">Daily hire rate</span>
+            <div class="p-inline">
+              <input id="p-tcrate" class="p-in" type="number" step="500" oninput="onParamChange()">
+              <span class="p-unit">$/day</span>
+            </div>
+            <span class="param-note" id="o-tcnote">—</span>
+          </div>
+        </div>
+
+        <!-- Sea days -->
+        <div class="param-block">
+          <div class="param-block-title">Days at Sea</div>
+          <div class="param-row">
+            <span class="param-lbl">Laden speed</span>
+            <div class="p-inline">
+              <input id="p-ladenspd" class="p-in" type="number" step="0.5" oninput="onParamChange()">
+              <span class="p-unit">knots</span>
+            </div>
+            <span class="param-note">Vessel design speed</span>
+          </div>
+          <div class="param-row">
+            <span class="param-lbl">Weather factor</span>
+            <div class="p-inline">
+              <input id="p-wx" class="p-in" type="number" step="0.01" oninput="onParamChange()">
+            </div>
+            <span class="param-note">1.05 = 5% extra for weather/routing</span>
+          </div>
+          <div class="param-row derived">
+            <span class="param-lbl">→ Laden days</span>
+            <span class="param-val-display" id="o-ladendays">—</span>
+            <span class="param-note">nm × weather ÷ (speed × 24)</span>
+          </div>
+          <div class="param-row">
+            <span class="param-lbl">Ballast speed</span>
+            <div class="p-inline">
+              <input id="p-ballspd" class="p-in" type="number" step="0.5" oninput="onParamChange()">
+              <span class="p-unit">knots</span>
+            </div>
+            <span class="param-note"></span>
+          </div>
+          <div class="param-row">
+            <span class="param-lbl">Ballast factor</span>
+            <div class="p-inline">
+              <input id="p-ball" class="p-in" type="number" step="0.05" oninput="onParamChange()">
+            </div>
+            <span class="param-note">Ballast leg ≈ 65% of laden distance</span>
+          </div>
+          <div class="param-row derived">
+            <span class="param-lbl">→ Ballast days</span>
+            <span class="param-val-display" id="o-balldays">—</span>
+            <span class="param-note">nm × ballast factor ÷ (speed × 24)</span>
+          </div>
+        </div>
+
+        <!-- Port days -->
+        <div class="param-block">
+          <div class="param-block-title">Days in Port</div>
+          <div class="param-row">
+            <span class="param-lbl">Load port rate</span>
+            <div class="p-inline">
+              <input id="p-lrate" class="p-in" type="number" step="500" oninput="onParamChange()">
+              <span class="p-unit">MT/day</span>
+            </div>
+            <span class="param-note" id="o-lportname">—</span>
+          </div>
+          <div class="param-row">
+            <span class="param-lbl">Disch. port rate</span>
+            <div class="p-inline">
+              <input id="p-drate" class="p-in" type="number" step="500" oninput="onParamChange()">
+              <span class="p-unit">MT/day</span>
+            </div>
+            <span class="param-note" id="o-dportname">—</span>
+          </div>
+          <div class="param-row derived">
+            <span class="param-lbl">→ Port days</span>
+            <span class="param-val-display" id="o-portdays">—</span>
+            <span class="param-note">cargo ÷ rate + 0.75d turn each port</span>
+          </div>
+          <div class="param-row subtotal-row">
+            <span class="param-lbl">Total days</span>
+            <span class="param-val-display" id="o-totaldays">—</span>
+            <span class="param-note">laden + ballast + port</span>
+          </div>
+        </div>
+
+      </div><!-- /sec-body -->
+    </div><!-- /sec1 -->
+
+    <!-- Section 2: Bunkers -->
+    <div class="sec-card" id="sec2">
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div><span class="sec-num">02</span><span class="sec-title">Bunkers</span></div>
+        <div style="display:flex;align-items:center">
+          <span class="sec-total" id="o-bunk">—</span>
+          <span class="sec-chevron">▼</span>
+        </div>
+      </div>
+      <div class="sec-body open">
+
+        <div class="param-block">
+          <div class="param-block-title">Fuel Prices</div>
+          <div class="param-row">
+            <span class="param-lbl">VLSFO price</span>
+            <div class="p-inline">
+              <input id="p-vlsfopx" class="p-in" type="number" step="5" oninput="onParamChange()">
+              <span class="p-unit">$/MT</span>
+            </div>
+            <span class="param-note">Very Low Sulphur Fuel Oil (main fuel)</span>
+          </div>
+          <div class="param-row">
+            <span class="param-lbl">MGO price</span>
+            <div class="p-inline">
+              <input id="p-mgopx" class="p-in" type="number" step="5" oninput="onParamChange()">
+              <span class="p-unit">$/MT</span>
+            </div>
+            <span class="param-note">Marine Gas Oil (ECA zones &amp; port)</span>
+          </div>
+        </div>
+
+        <div class="param-block">
+          <div class="param-block-title">Consumption Rates</div>
+          <div class="param-row">
+            <span class="param-lbl">Laden consumption</span>
+            <div class="p-inline">
+              <input id="p-ladencons" class="p-in" type="number" step="1" oninput="onParamChange()">
+              <span class="p-unit">MT/day</span>
+            </div>
+            <span class="param-note">Main engine laden</span>
+          </div>
+          <div class="param-row">
+            <span class="param-lbl">Ballast consumption</span>
+            <div class="p-inline">
+              <input id="p-ballcons" class="p-in" type="number" step="1" oninput="onParamChange()">
+              <span class="p-unit">MT/day</span>
+            </div>
+            <span class="param-note">Main engine ballast</span>
+          </div>
+          <div class="param-row">
+            <span class="param-lbl">Port consumption</span>
+            <div class="p-inline">
+              <input id="p-portcons" class="p-in" type="number" step="0.5" oninput="onParamChange()">
+              <span class="p-unit">MT/day</span>
+            </div>
+            <span class="param-note">Aux. engines in port</span>
+          </div>
+        </div>
+
+        <div class="param-block">
+          <div class="param-block-title">Breakdown</div>
+          <div class="param-row derived">
+            <span class="param-lbl">VLSFO (sea)</span>
+            <span class="param-val-display" id="o-vlsfomt">—</span>
+            <span class="param-note" id="o-vlsfocost">—</span>
+          </div>
+          <div class="param-row derived" id="row-mgo" style="display:none">
+            <span class="param-lbl">MGO (ECA zones)</span>
+            <span class="param-val-display" id="o-ecomt">—</span>
+            <span class="param-note" id="o-ecocost">—</span>
+          </div>
+          <div class="param-row derived">
+            <span class="param-lbl">MDO (port)</span>
+            <span class="param-val-display" id="o-portmdoamt">—</span>
+            <span class="param-note" id="o-portmdocost">—</span>
+          </div>
+          <div class="param-row subtotal-row">
+            <span class="param-lbl">Total bunkers</span>
+            <span class="param-val-display" id="o-bunk2">—</span>
+            <span class="param-note"></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section 3: Port DAs -->
+    <div class="sec-card" id="sec3">
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div><span class="sec-num">03</span><span class="sec-title">Port Disbursements (DAs)</span></div>
+        <div style="display:flex;align-items:center">
+          <span class="sec-total" id="o-das">—</span>
+          <span class="sec-chevron">▼</span>
+        </div>
+      </div>
+      <div class="sec-body open">
+        <div class="param-block">
+          <div class="param-block-title">Estimated Disbursement Accounts</div>
+          <div class="param-row">
+            <span class="param-lbl">Load port DA</span>
+            <div class="p-inline">
+              <input id="p-daload" class="p-in" type="number" step="1000" oninput="onParamChange()">
+              <span class="p-unit">USD</span>
+            </div>
+            <span class="param-note" id="o-daloadnote">—</span>
+          </div>
+          <div class="param-row">
+            <span class="param-lbl">Discharge port DA</span>
+            <div class="p-inline">
+              <input id="p-dadisch" class="p-in" type="number" step="1000" oninput="onParamChange()">
+              <span class="p-unit">USD</span>
+            </div>
+            <span class="param-note" id="o-dadischnote">—</span>
+          </div>
+          <div class="param-row subtotal-row">
+            <span class="param-lbl">Total DAs</span>
+            <span class="param-val-display" id="o-das2">—</span>
+            <span class="param-note">Agency, port dues, pilotage, towage</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Canals (conditional) -->
+    <div class="sec-card" id="sec4" style="display:none">
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div><span class="sec-num">04</span><span class="sec-title">Canal Tolls</span></div>
+        <div style="display:flex;align-items:center">
+          <span class="sec-total" id="o-canals">—</span>
+          <span class="sec-chevron">▼</span>
+        </div>
+      </div>
+      <div class="sec-body open" id="sec4body">
+        <!-- filled dynamically -->
+      </div>
+    </div>
+
+    <!-- Section 5: War Risk (conditional) -->
+    <div class="sec-card" id="sec5" style="display:none">
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div><span class="sec-num">05</span><span class="sec-title">War Risk Insurance</span></div>
+        <div style="display:flex;align-items:center">
+          <span class="sec-total" id="o-war">—</span>
+          <span class="sec-chevron">▼</span>
+        </div>
+      </div>
+      <div class="sec-body open" id="sec5body">
+        <!-- filled dynamically -->
+      </div>
+    </div>
+
+    <!-- Section 6: Commission -->
+    <div class="sec-card">
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div><span class="sec-num" id="sec6num">06</span><span class="sec-title">Address Commission</span></div>
+        <div style="display:flex;align-items:center">
+          <span class="sec-total" id="o-comm">—</span>
+          <span class="sec-chevron">▼</span>
+        </div>
+      </div>
+      <div class="sec-body open">
+        <div class="param-block">
+          <div class="param-block-title">Brokerage &amp; Address Commission</div>
+          <div class="param-row">
+            <span class="param-lbl">Commission rate</span>
+            <div class="p-inline">
+              <input id="p-commpct" class="p-in" type="number" step="0.25" min="0" max="10" oninput="onParamChange()">
+              <span class="p-unit">%</span>
+            </div>
+            <span class="param-note">Applied to total voyage cost</span>
+          </div>
+          <div class="param-row subtotal-row">
+            <span class="param-lbl">Total commission</span>
+            <span class="param-val-display" id="o-comm2">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grand Total -->
+    <div class="grand-total">
+      <div>
+        <div class="gt-label">Total Voyage Cost</div>
+        <div style="font-size:11px;color:#444;margin-top:2px" id="o-gtcargo">—</div>
+      </div>
+      <div style="text-align:right">
+        <div class="gt-val" id="o-grandtotal">—</div>
+        <div class="gt-permt" id="o-grandpermt">—</div>
+      </div>
+    </div>
+
+  </div><!-- /results -->
+</div><!-- /wrap -->
 
 <script>
 // ══════════════════════════════════════════════════
-// PORTS — embedded directly
+// PORTS (embedded)
 // ══════════════════════════════════════════════════
 const PORTS = [{"id":"rotterdam","name":"Rotterdam","country":"Netherlands","lat":51.95,"lon":4.1,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"antwerp","name":"Antwerp","country":"Belgium","lat":51.25,"lon":4.4,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"ghent","name":"Ghent","country":"Belgium","lat":51.1,"lon":3.75,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"amsterdam","name":"Amsterdam","country":"Netherlands","lat":52.4,"lon":4.9,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"hamburg","name":"Hamburg","country":"Germany","lat":53.55,"lon":10.0,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"bremen","name":"Bremen","country":"Germany","lat":53.083,"lon":8.8,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"brake","name":"Brake","country":"Germany","lat":53.333,"lon":8.483,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"dunkirk","name":"Dunkirk","country":"France","lat":51.033,"lon":2.367,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"rouen","name":"Rouen","country":"France","lat":49.433,"lon":1.083,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"la_pallice","name":"La Pallice (La Rochelle)","country":"France","lat":46.183,"lon":-1.233,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"nantes","name":"Nantes / St Nazaire","country":"France","lat":47.283,"lon":-2.217,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"bordeaux","name":"Bordeaux","country":"France","lat":44.85,"lon":-0.55,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"immingham","name":"Immingham","country":"United Kingdom","lat":53.633,"lon":-0.183,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"hull","name":"Hull","country":"United Kingdom","lat":53.733,"lon":-0.317,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"tilbury","name":"Tilbury / London","country":"United Kingdom","lat":51.45,"lon":0.367,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"avonmouth","name":"Avonmouth (Bristol)","country":"United Kingdom","lat":51.5,"lon":-2.717,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"dublin","name":"Dublin","country":"Ireland","lat":53.35,"lon":-6.217,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"cork","name":"Cork","country":"Ireland","lat":51.9,"lon":-8.283,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"ust_luga","name":"Ust-Luga","country":"Russia","lat":59.683,"lon":28.333,"region":"BALTIC","basin":"BALTIC"},{"id":"st_petersbg","name":"St Petersburg","country":"Russia","lat":59.933,"lon":30.2,"region":"BALTIC","basin":"BALTIC"},{"id":"ventspils","name":"Ventspils","country":"Latvia","lat":57.4,"lon":21.533,"region":"BALTIC","basin":"BALTIC"},{"id":"riga","name":"Riga","country":"Latvia","lat":57.017,"lon":24.05,"region":"BALTIC","basin":"BALTIC"},{"id":"tallinn","name":"Tallinn","country":"Estonia","lat":59.45,"lon":24.75,"region":"BALTIC","basin":"BALTIC"},{"id":"klaipeda","name":"Klaipeda","country":"Lithuania","lat":55.7,"lon":21.1,"region":"BALTIC","basin":"BALTIC"},{"id":"gdansk","name":"Gdansk","country":"Poland","lat":54.367,"lon":18.667,"region":"BALTIC","basin":"BALTIC"},{"id":"gdynia","name":"Gdynia","country":"Poland","lat":54.533,"lon":18.55,"region":"BALTIC","basin":"BALTIC"},{"id":"helsinki","name":"Helsinki","country":"Finland","lat":60.167,"lon":24.967,"region":"BALTIC","basin":"BALTIC"},{"id":"kotka","name":"Kotka","country":"Finland","lat":60.467,"lon":26.95,"region":"BALTIC","basin":"BALTIC"},{"id":"gothenburg","name":"Gothenburg","country":"Sweden","lat":57.7,"lon":11.967,"region":"BALTIC","basin":"BALTIC"},{"id":"oxelosund","name":"Oxelosund","country":"Sweden","lat":58.667,"lon":17.1,"region":"BALTIC","basin":"BALTIC"},{"id":"oslo","name":"Oslo","country":"Norway","lat":59.9,"lon":10.75,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"bergen","name":"Bergen","country":"Norway","lat":60.4,"lon":5.317,"region":"N.EUROPE","basin":"ATLANTIC"},{"id":"bilbao","name":"Bilbao","country":"Spain","lat":43.35,"lon":-3.05,"region":"W.MED","basin":"ATLANTIC"},{"id":"gijon","name":"Gijon","country":"Spain","lat":43.55,"lon":-5.7,"region":"W.MED","basin":"ATLANTIC"},{"id":"ferrol","name":"Ferrol","country":"Spain","lat":43.483,"lon":-8.217,"region":"W.MED","basin":"ATLANTIC"},{"id":"huelva","name":"Huelva","country":"Spain","lat":37.233,"lon":-6.933,"region":"W.MED","basin":"ATLANTIC"},{"id":"cartagena_es","name":"Cartagena (Spain)","country":"Spain","lat":37.6,"lon":-0.983,"region":"W.MED","basin":"MED"},{"id":"barcelona","name":"Barcelona","country":"Spain","lat":41.367,"lon":2.167,"region":"W.MED","basin":"MED"},{"id":"lisbon","name":"Lisbon","country":"Portugal","lat":38.7,"lon":-9.133,"region":"W.MED","basin":"ATLANTIC"},{"id":"setubal","name":"Setubal","country":"Portugal","lat":38.517,"lon":-8.9,"region":"W.MED","basin":"ATLANTIC"},{"id":"sines","name":"Sines","country":"Portugal","lat":37.95,"lon":-8.867,"region":"W.MED","basin":"ATLANTIC"},{"id":"genoa","name":"Genoa","country":"Italy","lat":44.4,"lon":8.933,"region":"W.MED","basin":"MED"},{"id":"la_spezia","name":"La Spezia","country":"Italy","lat":44.1,"lon":9.833,"region":"W.MED","basin":"MED"},{"id":"ravenna","name":"Ravenna","country":"Italy","lat":44.467,"lon":12.233,"region":"W.MED","basin":"MED"},{"id":"taranto","name":"Taranto","country":"Italy","lat":40.467,"lon":17.217,"region":"W.MED","basin":"MED"},{"id":"marseille","name":"Marseille","country":"France","lat":43.3,"lon":5.367,"region":"W.MED","basin":"MED"},{"id":"fos","name":"Fos-sur-Mer","country":"France","lat":43.433,"lon":4.917,"region":"W.MED","basin":"MED"},{"id":"algiers","name":"Algiers","country":"Algeria","lat":36.767,"lon":3.05,"region":"W.MED","basin":"MED"},{"id":"annaba","name":"Annaba","country":"Algeria","lat":36.9,"lon":7.767,"region":"W.MED","basin":"MED"},{"id":"oran","name":"Oran","country":"Algeria","lat":35.7,"lon":-0.633,"region":"W.MED","basin":"MED"},{"id":"casablanca","name":"Casablanca","country":"Morocco","lat":33.6,"lon":-7.617,"region":"W.MED","basin":"ATLANTIC"},{"id":"mohammedia","name":"Mohammedia","country":"Morocco","lat":33.733,"lon":-7.383,"region":"W.MED","basin":"ATLANTIC"},{"id":"jorf_lasfar","name":"Jorf Lasfar","country":"Morocco","lat":33.117,"lon":-8.633,"region":"W.MED","basin":"ATLANTIC"},{"id":"piraeus","name":"Piraeus","country":"Greece","lat":37.933,"lon":23.633,"region":"E.MED","basin":"MED"},{"id":"thessaloniki","name":"Thessaloniki","country":"Greece","lat":40.633,"lon":22.933,"region":"E.MED","basin":"MED"},{"id":"volos","name":"Volos","country":"Greece","lat":39.367,"lon":22.95,"region":"E.MED","basin":"MED"},{"id":"istanbul","name":"Istanbul","country":"Turkey","lat":41.017,"lon":28.967,"region":"E.MED","basin":"MED"},{"id":"izmir","name":"Izmir","country":"Turkey","lat":38.433,"lon":27.15,"region":"E.MED","basin":"MED"},{"id":"iskenderun","name":"Iskenderun","country":"Turkey","lat":36.583,"lon":36.167,"region":"E.MED","basin":"MED"},{"id":"mersin","name":"Mersin","country":"Turkey","lat":36.8,"lon":34.633,"region":"E.MED","basin":"MED"},{"id":"port_said","name":"Port Said","country":"Egypt","lat":31.267,"lon":32.3,"region":"E.MED","basin":"MED"},{"id":"alexandria","name":"Alexandria","country":"Egypt","lat":31.2,"lon":29.867,"region":"E.MED","basin":"MED"},{"id":"limassol","name":"Limassol","country":"Cyprus","lat":34.683,"lon":33.05,"region":"E.MED","basin":"MED"},{"id":"novorossiysk","name":"Novorossiysk","country":"Russia","lat":44.717,"lon":37.8,"region":"BLACK SEA","basin":"BLACK"},{"id":"tuapse","name":"Tuapse","country":"Russia","lat":44.1,"lon":39.083,"region":"BLACK SEA","basin":"BLACK"},{"id":"odessa","name":"Odessa","country":"Ukraine","lat":46.483,"lon":30.733,"region":"BLACK SEA","basin":"BLACK"},{"id":"mykolaiv","name":"Mykolaiv","country":"Ukraine","lat":46.967,"lon":32.0,"region":"BLACK SEA","basin":"BLACK"},{"id":"yuzhne","name":"Yuzhne","country":"Ukraine","lat":46.633,"lon":31.133,"region":"BLACK SEA","basin":"BLACK"},{"id":"constanta","name":"Constanta","country":"Romania","lat":44.167,"lon":28.667,"region":"BLACK SEA","basin":"BLACK"},{"id":"varna","name":"Varna","country":"Bulgaria","lat":43.2,"lon":27.917,"region":"BLACK SEA","basin":"BLACK"},{"id":"new_york","name":"New York / New Jersey","country":"United States","lat":40.667,"lon":-74.05,"region":"US EAST COAST","basin":"ATLANTIC"},{"id":"baltimore","name":"Baltimore","country":"United States","lat":39.267,"lon":-76.583,"region":"US EAST COAST","basin":"ATLANTIC"},{"id":"norfolk","name":"Norfolk / Hampton Roads","country":"United States","lat":36.9,"lon":-76.3,"region":"US EAST COAST","basin":"ATLANTIC"},{"id":"wilmington_nc","name":"Wilmington NC","country":"United States","lat":34.233,"lon":-77.95,"region":"US EAST COAST","basin":"ATLANTIC"},{"id":"savannah","name":"Savannah","country":"United States","lat":32.083,"lon":-81.1,"region":"US EAST COAST","basin":"ATLANTIC"},{"id":"new_orleans","name":"New Orleans","country":"United States","lat":29.95,"lon":-90.067,"region":"US GULF","basin":"ATLANTIC"},{"id":"houston","name":"Houston","country":"United States","lat":29.75,"lon":-95.367,"region":"US GULF","basin":"ATLANTIC"},{"id":"beaumont","name":"Beaumont","country":"United States","lat":30.083,"lon":-94.1,"region":"US GULF","basin":"ATLANTIC"},{"id":"baton_rouge","name":"Baton Rouge","country":"United States","lat":30.45,"lon":-91.15,"region":"US GULF","basin":"ATLANTIC"},{"id":"st_charles","name":"St Charles (Convent)","country":"United States","lat":29.983,"lon":-90.483,"region":"US GULF","basin":"ATLANTIC"},{"id":"mobile","name":"Mobile","country":"United States","lat":30.7,"lon":-88.033,"region":"US GULF","basin":"ATLANTIC"},{"id":"pensacola","name":"Pensacola","country":"United States","lat":30.4,"lon":-87.217,"region":"US GULF","basin":"ATLANTIC"},{"id":"corpus_christi","name":"Corpus Christi","country":"United States","lat":27.8,"lon":-97.4,"region":"US GULF","basin":"ATLANTIC"},{"id":"montreal","name":"Montreal","country":"Canada","lat":45.567,"lon":-73.55,"region":"E.N.AMERICA","basin":"ATLANTIC"},{"id":"quebec","name":"Quebec City","country":"Canada","lat":46.817,"lon":-71.2,"region":"E.N.AMERICA","basin":"ATLANTIC"},{"id":"sept_iles","name":"Sept-Iles","country":"Canada","lat":50.2,"lon":-66.367,"region":"E.N.AMERICA","basin":"ATLANTIC"},{"id":"halifax","name":"Halifax","country":"Canada","lat":44.65,"lon":-63.583,"region":"E.N.AMERICA","basin":"ATLANTIC"},{"id":"santos","name":"Santos","country":"Brazil","lat":-23.95,"lon":-46.3,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"paranagua","name":"Paranagua","country":"Brazil","lat":-25.5,"lon":-48.533,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"rio_grande","name":"Rio Grande","country":"Brazil","lat":-32.033,"lon":-52.1,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"tubarao","name":"Tubarao","country":"Brazil","lat":-20.283,"lon":-40.233,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"ponta_ubu","name":"Ponta Ubu","country":"Brazil","lat":-20.783,"lon":-40.567,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"guaiba","name":"Guaiba Island","country":"Brazil","lat":-22.9,"lon":-43.117,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"itaqui","name":"Itaqui (Sao Luis)","country":"Brazil","lat":-2.567,"lon":-44.367,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"fortaleza","name":"Fortaleza","country":"Brazil","lat":-3.683,"lon":-38.467,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"recife","name":"Recife","country":"Brazil","lat":-8.067,"lon":-34.867,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"salvador","name":"Salvador (Bahia)","country":"Brazil","lat":-12.967,"lon":-38.517,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"vitoria","name":"Vitoria","country":"Brazil","lat":-20.317,"lon":-40.317,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"rosario","name":"Rosario","country":"Argentina","lat":-32.933,"lon":-60.633,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"buenos_aires","name":"Buenos Aires","country":"Argentina","lat":-34.6,"lon":-58.367,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"bahia_blanca","name":"Bahia Blanca","country":"Argentina","lat":-38.717,"lon":-62.267,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"necochea","name":"Necochea (Quequen)","country":"Argentina","lat":-38.567,"lon":-58.733,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"nueva_palmira","name":"Nueva Palmira","country":"Uruguay","lat":-33.883,"lon":-58.4,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"montevideo","name":"Montevideo","country":"Uruguay","lat":-34.9,"lon":-56.25,"region":"E.S.AMERICA","basin":"ATLANTIC"},{"id":"barranquilla","name":"Barranquilla","country":"Colombia","lat":11.0,"lon":-74.8,"region":"N.S.AMERICA","basin":"ATLANTIC"},{"id":"cartagena_co","name":"Cartagena (Colombia)","country":"Colombia","lat":10.4,"lon":-75.517,"region":"N.S.AMERICA","basin":"ATLANTIC"},{"id":"pto_bolivar","name":"Puerto Bolivar","country":"Colombia","lat":12.233,"lon":-71.967,"region":"N.S.AMERICA","basin":"ATLANTIC"},{"id":"maracaibo","name":"Maracaibo","country":"Venezuela","lat":10.633,"lon":-71.633,"region":"N.S.AMERICA","basin":"ATLANTIC"},{"id":"la_guaira","name":"La Guaira","country":"Venezuela","lat":10.6,"lon":-66.933,"region":"N.S.AMERICA","basin":"ATLANTIC"},{"id":"guanta","name":"Guanta","country":"Venezuela","lat":10.233,"lon":-64.583,"region":"N.S.AMERICA","basin":"ATLANTIC"},{"id":"callao","name":"Callao (Lima)","country":"Peru","lat":-12.05,"lon":-77.15,"region":"W.S.AMERICA","basin":"PACIFIC"},{"id":"ilo","name":"Ilo","country":"Peru","lat":-17.65,"lon":-71.367,"region":"W.S.AMERICA","basin":"PACIFIC"},{"id":"guayaquil","name":"Guayaquil","country":"Ecuador","lat":-2.233,"lon":-79.9,"region":"W.S.AMERICA","basin":"PACIFIC"},{"id":"puerto_cabello","name":"Puerto Cabello","country":"Venezuela","lat":10.483,"lon":-68.017,"region":"CARIBBEAN","basin":"ATLANTIC"},{"id":"kingston","name":"Kingston","country":"Jamaica","lat":17.967,"lon":-76.783,"region":"CARIBBEAN","basin":"ATLANTIC"},{"id":"colon","name":"Colon","country":"Panama","lat":9.367,"lon":-79.9,"region":"CARIBBEAN","basin":"ATLANTIC"},{"id":"santo_domingo","name":"Santo Domingo","country":"Dominican Republic","lat":18.467,"lon":-69.9,"region":"CARIBBEAN","basin":"ATLANTIC"},{"id":"veracruz","name":"Veracruz","country":"Mexico","lat":19.2,"lon":-96.133,"region":"MEXICO","basin":"ATLANTIC"},{"id":"coatzacoalcos","name":"Coatzacoalcos","country":"Mexico","lat":18.15,"lon":-94.433,"region":"MEXICO","basin":"ATLANTIC"},{"id":"altamira","name":"Altamira","country":"Mexico","lat":22.4,"lon":-97.917,"region":"MEXICO","basin":"ATLANTIC"},{"id":"manzanillo_mx","name":"Manzanillo (Mexico)","country":"Mexico","lat":19.05,"lon":-104.317,"region":"MEXICO","basin":"PACIFIC"},{"id":"dakar","name":"Dakar","country":"Senegal","lat":14.683,"lon":-17.433,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"abidjan","name":"Abidjan","country":"Cote D'Ivoire","lat":5.267,"lon":-4.0,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"tema","name":"Tema (Accra)","country":"Ghana","lat":5.617,"lon":-0.017,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"lome","name":"Lome","country":"Togo","lat":6.133,"lon":1.267,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"cotonou","name":"Cotonou","country":"Benin","lat":6.367,"lon":2.433,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"lagos","name":"Lagos (Apapa)","country":"Nigeria","lat":6.45,"lon":3.383,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"warri","name":"Warri","country":"Nigeria","lat":5.517,"lon":5.75,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"port_harcourt","name":"Port Harcourt","country":"Nigeria","lat":4.767,"lon":7.017,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"douala","name":"Douala","country":"Cameroon","lat":4.05,"lon":9.7,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"libreville","name":"Libreville","country":"Gabon","lat":0.383,"lon":9.45,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"owendo","name":"Owendo","country":"Gabon","lat":0.283,"lon":9.5,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"pointe_noire","name":"Pointe Noire","country":"Congo (Brazzaville)","lat":-4.783,"lon":11.833,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"lobito","name":"Lobito","country":"Angola","lat":-12.317,"lon":13.533,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"luanda","name":"Luanda","country":"Angola","lat":-8.817,"lon":13.233,"region":"W.AFRICA","basin":"ATLANTIC"},{"id":"richards_bay","name":"Richards Bay","country":"South Africa","lat":-28.8,"lon":32.067,"region":"S.AFRICA","basin":"INDIAN"},{"id":"durban","name":"Durban","country":"South Africa","lat":-29.867,"lon":31.033,"region":"S.AFRICA","basin":"INDIAN"},{"id":"cape_town","name":"Cape Town","country":"South Africa","lat":-33.917,"lon":18.433,"region":"S.AFRICA","basin":"ATLANTIC"},{"id":"port_elizabeth","name":"Port Elizabeth (Gqeberha)","country":"South Africa","lat":-33.967,"lon":25.633,"region":"S.AFRICA","basin":"INDIAN"},{"id":"saldanha","name":"Saldanha Bay","country":"South Africa","lat":-33.017,"lon":17.967,"region":"S.AFRICA","basin":"ATLANTIC"},{"id":"mombasa","name":"Mombasa","country":"Kenya","lat":-4.067,"lon":39.667,"region":"E.AFRICA","basin":"INDIAN"},{"id":"dar_es_salaam","name":"Dar es Salaam","country":"Tanzania","lat":-6.817,"lon":39.3,"region":"E.AFRICA","basin":"INDIAN"},{"id":"beira","name":"Beira","country":"Mozambique","lat":-19.817,"lon":34.85,"region":"E.AFRICA","basin":"INDIAN"},{"id":"maputo","name":"Maputo","country":"Mozambique","lat":-25.967,"lon":32.583,"region":"E.AFRICA","basin":"INDIAN"},{"id":"nacala","name":"Nacala","country":"Mozambique","lat":-14.533,"lon":40.683,"region":"E.AFRICA","basin":"INDIAN"},{"id":"jeddah","name":"Jeddah","country":"Saudi Arabia","lat":21.467,"lon":39.167,"region":"RED SEA","basin":"INDIAN"},{"id":"yanbu","name":"Yanbu","country":"Saudi Arabia","lat":24.083,"lon":38.05,"region":"RED SEA","basin":"INDIAN"},{"id":"aqaba","name":"Aqaba","country":"Jordan","lat":29.517,"lon":35.0,"region":"RED SEA","basin":"INDIAN"},{"id":"suez","name":"Suez","country":"Egypt","lat":29.967,"lon":32.55,"region":"RED SEA","basin":"INDIAN"},{"id":"djibouti","name":"Djibouti","country":"Djibouti","lat":11.6,"lon":43.15,"region":"RED SEA","basin":"INDIAN"},{"id":"port_sudan","name":"Port Sudan","country":"Sudan","lat":19.617,"lon":37.217,"region":"RED SEA","basin":"INDIAN"},{"id":"muscat","name":"Muscat","country":"Oman","lat":23.633,"lon":58.6,"region":"MIDDLE EAST","basin":"INDIAN"},{"id":"sohar","name":"Sohar","country":"Oman","lat":24.35,"lon":56.65,"region":"MIDDLE EAST","basin":"INDIAN"},{"id":"salalah","name":"Salalah","country":"Oman","lat":16.933,"lon":54.0,"region":"MIDDLE EAST","basin":"INDIAN"},{"id":"dubai","name":"Dubai (Jebel Ali)","country":"United Arab Emirates","lat":25.017,"lon":55.067,"region":"MIDDLE EAST","basin":"INDIAN"},{"id":"abu_dhabi","name":"Abu Dhabi (Mina Zayed)","country":"United Arab Emirates","lat":24.483,"lon":54.383,"region":"MIDDLE EAST","basin":"INDIAN"},{"id":"kuwait","name":"Kuwait City","country":"Kuwait","lat":29.367,"lon":47.967,"region":"MIDDLE EAST","basin":"INDIAN"},{"id":"basra","name":"Basra (Umm Qasr)","country":"Iraq","lat":29.983,"lon":48.767,"region":"MIDDLE EAST","basin":"INDIAN"},{"id":"bandar_abbas","name":"Bandar Abbas","country":"Iran","lat":27.183,"lon":56.267,"region":"MIDDLE EAST","basin":"INDIAN"},{"id":"karachi","name":"Karachi","country":"Pakistan","lat":24.833,"lon":67.0,"region":"W.INDIA","basin":"INDIAN"},{"id":"mundra","name":"Mundra","country":"India","lat":22.833,"lon":69.717,"region":"W.INDIA","basin":"INDIAN"},{"id":"kandla","name":"Kandla","country":"India","lat":23.017,"lon":70.217,"region":"W.INDIA","basin":"INDIAN"},{"id":"pipavav","name":"Pipavav","country":"India","lat":20.917,"lon":71.533,"region":"W.INDIA","basin":"INDIAN"},{"id":"nhava_sheva","name":"Nhava Sheva (Mumbai)","country":"India","lat":18.95,"lon":72.95,"region":"W.INDIA","basin":"INDIAN"},{"id":"mormugao","name":"Mormugao","country":"India","lat":15.4,"lon":73.8,"region":"W.INDIA","basin":"INDIAN"},{"id":"new_mangalore","name":"New Mangalore","country":"India","lat":12.917,"lon":74.817,"region":"W.INDIA","basin":"INDIAN"},{"id":"cochin","name":"Cochin","country":"India","lat":9.967,"lon":76.267,"region":"W.INDIA","basin":"INDIAN"},{"id":"tuticorin","name":"Tuticorin","country":"India","lat":8.767,"lon":78.133,"region":"S.INDIA","basin":"INDIAN"},{"id":"colombo","name":"Colombo","country":"Sri Lanka","lat":6.95,"lon":79.85,"region":"S.INDIA","basin":"INDIAN"},{"id":"chennai","name":"Chennai (Madras)","country":"India","lat":13.1,"lon":80.3,"region":"E.INDIA","basin":"INDIAN"},{"id":"kamarajar","name":"Kamarajar (Ennore)","country":"India","lat":13.217,"lon":80.317,"region":"E.INDIA","basin":"INDIAN"},{"id":"vishakhapatnam","name":"Vishakhapatnam","country":"India","lat":17.683,"lon":83.283,"region":"E.INDIA","basin":"INDIAN"},{"id":"gangavaram","name":"Gangavaram","country":"India","lat":17.617,"lon":83.233,"region":"E.INDIA","basin":"INDIAN"},{"id":"paradip","name":"Paradip","country":"India","lat":20.317,"lon":86.617,"region":"E.INDIA","basin":"INDIAN"},{"id":"haldia","name":"Haldia","country":"India","lat":22.033,"lon":88.1,"region":"E.INDIA","basin":"INDIAN"},{"id":"chittagong","name":"Chittagong","country":"Bangladesh","lat":22.333,"lon":91.817,"region":"E.INDIA","basin":"INDIAN"},{"id":"singapore","name":"Singapore","country":"Singapore","lat":1.267,"lon":103.817,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"port_klang","name":"Port Klang","country":"Malaysia","lat":3.0,"lon":101.367,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"penang","name":"Penang","country":"Malaysia","lat":5.417,"lon":100.333,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"kuantan","name":"Kuantan","country":"Malaysia","lat":3.983,"lon":103.433,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"jakarta","name":"Jakarta (Tanjung Priok)","country":"Indonesia","lat":-6.1,"lon":106.883,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"surabaya","name":"Surabaya","country":"Indonesia","lat":-7.2,"lon":112.733,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"banjarmasin","name":"Banjarmasin","country":"Indonesia","lat":-3.317,"lon":114.583,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"balikpapan","name":"Balikpapan","country":"Indonesia","lat":-1.267,"lon":116.833,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"samarinda","name":"Samarinda","country":"Indonesia","lat":-0.5,"lon":117.15,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"muara","name":"Muara (Brunei)","country":"Brunei","lat":5.017,"lon":115.067,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"bangkok","name":"Bangkok","country":"Thailand","lat":13.567,"lon":100.567,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"laem_chabang","name":"Laem Chabang","country":"Thailand","lat":13.083,"lon":100.883,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"ho_chi_minh","name":"Ho Chi Minh City","country":"Vietnam","lat":10.783,"lon":106.7,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"haiphong","name":"Haiphong","country":"Vietnam","lat":20.867,"lon":106.683,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"manila","name":"Manila","country":"Philippines","lat":14.583,"lon":120.967,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"cebu","name":"Cebu","country":"Philippines","lat":10.317,"lon":123.9,"region":"SE.ASIA","basin":"PACIFIC"},{"id":"shanghai","name":"Shanghai","country":"China","lat":31.233,"lon":121.5,"region":"CHINA","basin":"PACIFIC"},{"id":"ningbo","name":"Ningbo","country":"China","lat":29.867,"lon":121.55,"region":"CHINA","basin":"PACIFIC"},{"id":"qingdao","name":"Qingdao","country":"China","lat":36.067,"lon":120.383,"region":"CHINA","basin":"PACIFIC"},{"id":"tianjin","name":"Tianjin (Xingang)","country":"China","lat":38.983,"lon":117.717,"region":"CHINA","basin":"PACIFIC"},{"id":"rizhao","name":"Rizhao","country":"China","lat":35.383,"lon":119.467,"region":"CHINA","basin":"PACIFIC"},{"id":"lianyungang","name":"Lianyungang","country":"China","lat":34.767,"lon":119.433,"region":"CHINA","basin":"PACIFIC"},{"id":"zhoushan","name":"Zhoushan","country":"China","lat":30.017,"lon":122.083,"region":"CHINA","basin":"PACIFIC"},{"id":"guangzhou","name":"Guangzhou (Nansha)","country":"China","lat":22.733,"lon":113.567,"region":"CHINA","basin":"PACIFIC"},{"id":"shenzhen","name":"Shenzhen (Yantian)","country":"China","lat":22.567,"lon":114.267,"region":"CHINA","basin":"PACIFIC"},{"id":"zhanjiang","name":"Zhanjiang","country":"China","lat":21.183,"lon":110.4,"region":"CHINA","basin":"PACIFIC"},{"id":"hong_kong","name":"Hong Kong","country":"Hong Kong","lat":22.283,"lon":114.167,"region":"CHINA","basin":"PACIFIC"},{"id":"fuzhou","name":"Fuzhou","country":"China","lat":26.083,"lon":119.317,"region":"CHINA","basin":"PACIFIC"},{"id":"xiamen","name":"Xiamen","country":"China","lat":24.45,"lon":118.083,"region":"CHINA","basin":"PACIFIC"},{"id":"caofeidian","name":"Caofeidian","country":"China","lat":39.483,"lon":118.967,"region":"CHINA","basin":"PACIFIC"},{"id":"dalian","name":"Dalian","country":"China","lat":38.917,"lon":121.65,"region":"CHINA","basin":"PACIFIC"},{"id":"busan","name":"Busan","country":"South Korea","lat":35.1,"lon":129.05,"region":"N.ASIA","basin":"PACIFIC"},{"id":"gwangyang","name":"Gwangyang","country":"South Korea","lat":34.933,"lon":127.7,"region":"N.ASIA","basin":"PACIFIC"},{"id":"incheon","name":"Incheon","country":"South Korea","lat":37.467,"lon":126.617,"region":"N.ASIA","basin":"PACIFIC"},{"id":"pohang","name":"Pohang","country":"South Korea","lat":36.017,"lon":129.367,"region":"N.ASIA","basin":"PACIFIC"},{"id":"tokyo","name":"Tokyo","country":"Japan","lat":35.617,"lon":139.767,"region":"N.ASIA","basin":"PACIFIC"},{"id":"yokohama","name":"Yokohama","country":"Japan","lat":35.45,"lon":139.65,"region":"N.ASIA","basin":"PACIFIC"},{"id":"nagoya","name":"Nagoya","country":"Japan","lat":35.05,"lon":136.883,"region":"N.ASIA","basin":"PACIFIC"},{"id":"osaka","name":"Osaka / Kobe","country":"Japan","lat":34.683,"lon":135.483,"region":"N.ASIA","basin":"PACIFIC"},{"id":"fukuyama","name":"Fukuyama","country":"Japan","lat":34.45,"lon":133.367,"region":"N.ASIA","basin":"PACIFIC"},{"id":"kashima","name":"Kashima","country":"Japan","lat":35.967,"lon":140.65,"region":"N.ASIA","basin":"PACIFIC"},{"id":"kitakyushu","name":"Kitakyushu","country":"Japan","lat":33.9,"lon":130.817,"region":"N.ASIA","basin":"PACIFIC"},{"id":"taiwan_kh","name":"Kaohsiung","country":"Taiwan","lat":22.617,"lon":120.267,"region":"N.ASIA","basin":"PACIFIC"},{"id":"port_hedland","name":"Port Hedland","country":"Australia","lat":-20.317,"lon":118.583,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"dampier","name":"Dampier","country":"Australia","lat":-20.65,"lon":116.717,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"cape_lambert","name":"Cape Lambert","country":"Australia","lat":-20.6,"lon":117.183,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"hay_point","name":"Hay Point","country":"Australia","lat":-21.267,"lon":149.3,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"abbot_point","name":"Abbot Point","country":"Australia","lat":-19.883,"lon":148.083,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"gladstone","name":"Gladstone","country":"Australia","lat":-23.833,"lon":151.25,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"newcastle_au","name":"Newcastle (Australia)","country":"Australia","lat":-32.917,"lon":151.783,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"brisbane","name":"Brisbane","country":"Australia","lat":-27.367,"lon":153.167,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"melbourne","name":"Melbourne","country":"Australia","lat":-37.817,"lon":144.917,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"fremantle","name":"Fremantle (Perth)","country":"Australia","lat":-32.05,"lon":115.75,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"adelaide","name":"Adelaide","country":"Australia","lat":-34.933,"lon":138.467,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"geraldton","name":"Geraldton","country":"Australia","lat":-28.783,"lon":114.617,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"esperance","name":"Esperance","country":"Australia","lat":-33.867,"lon":121.9,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"kwinana","name":"Kwinana","country":"Australia","lat":-32.233,"lon":115.783,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"townsville","name":"Townsville","country":"Australia","lat":-19.267,"lon":146.817,"region":"AUSTRALIA","basin":"PACIFIC"},{"id":"port_kembla","name":"Port Kembla","country":"Australia","lat":-34.483,"lon":150.9,"region":"AUSTRALIA","basin":"PACIFIC"}];
 
@@ -144,11 +501,11 @@ const PORTS = [{"id":"rotterdam","name":"Rotterdam","country":"Netherlands","lat
 // VESSEL SPECS
 // ══════════════════════════════════════════════════
 const VESSEL_SPECS = {
-  HANDY:    {ladenKn:13.0, ballKn:13.5, ladenCons:24, ballCons:21, portCons:3},
-  SUPRAMAX: {ladenKn:13.5, ballKn:14.0, ladenCons:28, ballCons:25, portCons:3},
-  ULTRAMAX: {ladenKn:13.5, ballKn:14.0, ladenCons:30, ballCons:27, portCons:3},
-  PANAMAX:  {ladenKn:13.5, ballKn:14.0, ladenCons:32, ballCons:29, portCons:4},
-  CAPESIZE: {ladenKn:14.0, ballKn:14.5, ladenCons:52, ballCons:46, portCons:5},
+  HANDY:    {ladenKn:13.0,ballKn:13.5,ladenCons:24,ballCons:21,portCons:3},
+  SUPRAMAX: {ladenKn:13.5,ballKn:14.0,ladenCons:28,ballCons:25,portCons:3},
+  ULTRAMAX: {ladenKn:13.5,ballKn:14.0,ladenCons:30,ballCons:27,portCons:3},
+  PANAMAX:  {ladenKn:13.5,ballKn:14.0,ladenCons:32,ballCons:29,portCons:4},
+  CAPESIZE: {ladenKn:14.0,ballKn:14.5,ladenCons:52,ballCons:46,portCons:5},
 };
 const VESSEL_RANGES = [
   {v:'HANDY',    label:'Handysize', min:5000,  max:39999, dwt:32000,  desc:'~32,000 DWT · 5k–40k MT'},
@@ -212,225 +569,173 @@ const RN = {
   'AUSTRALIA':['AUSTRALIA','N.ASIA'],
 };
 function matchTC(oR, dR, vt){
-  let best=null, bsc=0;
+  let best=null, bsc=0, bestF=null;
   for(const f of FIXTURES){
     let s=0;
     if(f.oR===oR)s+=40; else if((RN[f.oR]||[]).includes(oR))s+=20; else if((RN[oR]||[]).includes(f.oR))s+=12;
     if(f.dR===dR)s+=40; else if((RN[f.dR]||[]).includes(dR))s+=20; else if((RN[dR]||[]).includes(f.dR))s+=12;
     if(f.vt===vt)s+=20; else s+=5;
-    if(s>bsc){bsc=s;best=f;}
+    if(s>bsc){bsc=s;best=f.rate;bestF=f;}
   }
-  return best ? best.rate : 15000;
+  return {rate: best||15000, fixture: bestF};
 }
 
 // ══════════════════════════════════════════════════
-// PORT RATES (load/discharge MT/day)
+// PORT DA / HANDLING RATES
 // ══════════════════════════════════════════════════
 const DA = {
   'N.EUROPE':65000,'BALTIC':50000,'W.MED':44000,'E.MED':39000,'BLACK SEA':34000,
   'US GULF':58000,'US EAST COAST':54000,'E.S.AMERICA':41000,'N.S.AMERICA':37000,
   'W.AFRICA':44000,'S.AFRICA':41000,'E.AFRICA':34000,'RED SEA':34000,
   'MIDDLE EAST':37000,'W.INDIA':31000,'E.INDIA':27000,'SE.ASIA':31000,
-  'CHINA':37000,'N.ASIA':43000,'AUSTRALIA':43000,
+  'CHINA':37000,'N.ASIA':43000,'AUSTRALIA':43000,'E.N.AMERICA':52000,
+  'CARIBBEAN':34000,'MEXICO':36000,'W.S.AMERICA':33000,'S.INDIA':29000,
 };
-const PORT_RATE = { // MT/day by region
+const PORT_RATE = {
   'N.EUROPE':8000,'BALTIC':7000,'W.MED':7000,'E.MED':6500,'BLACK SEA':6000,
   'US GULF':9000,'US EAST COAST':8500,'E.S.AMERICA':5500,'N.S.AMERICA':5000,
   'W.AFRICA':4500,'S.AFRICA':5000,'E.AFRICA':4000,'RED SEA':5000,
   'MIDDLE EAST':5500,'W.INDIA':5000,'E.INDIA':5000,'SE.ASIA':6500,
-  'CHINA':8000,'N.ASIA':7500,'AUSTRALIA':7000,
+  'CHINA':8000,'N.ASIA':7500,'AUSTRALIA':7000,'E.N.AMERICA':7500,
+  'CARIBBEAN':5000,'MEXICO':5500,'W.S.AMERICA':5000,'S.INDIA':4500,
 };
 const ECA = new Set(['N.EUROPE','BALTIC','US GULF','US EAST COAST']);
 const WAR = {
-  redsea:  {label:'Red Sea / Houthi',   hull:175000, cargoPerMt:0.20, regions:new Set(['RED SEA'])},
-  blacksea:{label:'Black Sea / Ukraine',hull:115000, cargoPerMt:0.15, regions:new Set(['BLACK SEA'])},
+  redsea:  {label:'Red Sea / Houthi',   hull:175000, cargoPerMt:0.20},
+  blacksea:{label:'Black Sea / Ukraine', hull:115000, cargoPerMt:0.15},
+};
+const TOLLS = {
+  suez:  {HANDY:155000,SUPRAMAX:230000,ULTRAMAX:270000,PANAMAX:325000,CAPESIZE:420000},
+  panama:{HANDY:130000,SUPRAMAX:185000,ULTRAMAX:215000,PANAMAX:270000,CAPESIZE:0},
 };
 
 // ══════════════════════════════════════════════════
-// DISTANCE — haversine + routing factors
+// ROUTING
 // ══════════════════════════════════════════════════
 function haversine(la1,lo1,la2,lo2){
-  const R=3440.065, r=Math.PI/180;
-  const dLa=(la2-la1)*r, dLo=(lo2-lo1)*r;
+  const R=3440.065,r=Math.PI/180;
+  const dLa=(la2-la1)*r,dLo=(lo2-lo1)*r;
   const a=Math.sin(dLa/2)**2+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dLo/2)**2;
   return 2*R*Math.asin(Math.sqrt(a));
 }
+const WP={suez:{lat:30.0,lon:32.5},panama:{lat:9.0,lon:-79.5},cape:{lat:-34.5,lon:20.0}};
 
-// Waypoints for routing decisions
-const WP = {
-  suez:   {lat:30.0, lon:32.5},
-  panama: {lat:9.0,  lon:-79.5},
-  cape:   {lat:-34.5,lon:20.0},
-  bab:    {lat:12.5, lon:43.5},
-  hormuz: {lat:26.5, lon:56.3},
-  malacca:{lat:1.5,  lon:103.8},
-  dover:  {lat:51.1, lon:1.3},
-  gib:    {lat:36.0, lon:-5.4},
-};
-
-function routedDistance(pA, pB){
+function routedDistance(pA,pB){
   const la1=pA.lat,lo1=pA.lon,la2=pB.lat,lo2=pB.lon;
-  // Direct haversine as baseline
-  const direct = haversine(la1,lo1,la2,lo2);
-
-  // Determine basins from regions
-  const bA = pA.basin||'', bB = pB.basin||'';
-  const rA = pA.region||'', rB = pB.region||'';
-
-  const isAtlantic = r => ['N.EUROPE','BALTIC','W.MED','US GULF','US EAST COAST','E.S.AMERICA','N.S.AMERICA','W.AFRICA','S.AFRICA'].some(x=>r.includes(x));
-  const isPacific  = r => ['CHINA','N.ASIA','SE.ASIA','AUSTRALIA','W.S.AMERICA'].some(x=>r.includes(x));
-  const isIndian   = r => ['W.INDIA','E.INDIA','RED SEA','MIDDLE EAST','E.AFRICA'].some(x=>r.includes(x));
-  const isBlackSea = r => r==='BLACK SEA';
-
-  const atA=isAtlantic(rA), atB=isAtlantic(rB);
-  const paA=isPacific(rA),  paB=isPacific(rB);
-  const inA=isIndian(rA),   inB=isIndian(rB);
-  const bsA=isBlackSea(rA), bsB=isBlackSea(rB);
-
-  let nm, canals=[], warZones=[];
-
-  // Atlantic ↔ Pacific → Panama or Cape
+  const rA=pA.region||'',rB=pB.region||'';
+  const isAtl=r=>['N.EUROPE','BALTIC','W.MED','US GULF','US EAST COAST','E.S.AMERICA','N.S.AMERICA','W.AFRICA','S.AFRICA','E.N.AMERICA','CARIBBEAN','MEXICO'].some(x=>r.includes(x));
+  const isPac=r=>['CHINA','N.ASIA','SE.ASIA','AUSTRALIA','W.S.AMERICA','MEXICO'].some(x=>r.includes(x));
+  const isInd=r=>['W.INDIA','E.INDIA','RED SEA','MIDDLE EAST','E.AFRICA','S.INDIA'].some(x=>r.includes(x));
+  const isBlk=r=>r==='BLACK SEA';
+  const atA=isAtl(rA),atB=isAtl(rB),paA=isPac(rA),paB=isPac(rB),inA=isInd(rA),inB=isInd(rB),bsA=isBlk(rA),bsB=isBlk(rB);
+  let nm,canals=[],warZones=[],routeDesc='Direct';
   if((atA&&paB)||(paA&&atB)){
-    const viaPanama = haversine(la1,lo1,WP.panama.lat,WP.panama.lon)
-                    + haversine(WP.panama.lat,WP.panama.lon,la2,lo2);
-    const viaCape   = haversine(la1,lo1,WP.cape.lat,WP.cape.lon)
-                    + haversine(WP.cape.lat,WP.cape.lon,la2,lo2);
-    if(viaPanama < viaCape*1.05){nm=viaPanama*1.03; canals=['panama'];}
-    else{nm=viaCape*0.94;}
+    const vP=haversine(la1,lo1,WP.panama.lat,WP.panama.lon)+haversine(WP.panama.lat,WP.panama.lon,la2,lo2);
+    const vC=haversine(la1,lo1,WP.cape.lat,WP.cape.lon)+haversine(WP.cape.lat,WP.cape.lon,la2,lo2);
+    if(vP<vC*1.05){nm=vP*1.03;canals=['panama'];routeDesc='via Panama Canal';}
+    else{nm=vC*0.94;routeDesc='via Cape of Good Hope';}
+  } else if((atA||bsA)&&(inB||paB)||(atB||bsB)&&(inA||paA)){
+    const vS=haversine(la1,lo1,WP.suez.lat,WP.suez.lon)+haversine(WP.suez.lat,WP.suez.lon,la2,lo2);
+    const vC=haversine(la1,lo1,WP.cape.lat,WP.cape.lon)+haversine(WP.cape.lat,WP.cape.lon,la2,lo2);
+    if(vS<vC*1.10){nm=vS*1.04;canals=['suez'];routeDesc='via Suez Canal';
+      if(rA==='RED SEA'||rB==='RED SEA') warZones.push('redsea');
+    } else {nm=vC*0.94;routeDesc='via Cape of Good Hope';}
+  } else if(bsA||bsB){
+    nm=haversine(la1,lo1,la2,lo2)*1.12; routeDesc='via Bosphorus';
+    if((bsA&&(inB||paB))||(bsB&&(inA||paA))){canals=['suez'];routeDesc='via Bosphorus + Suez';}
+  } else {
+    nm=haversine(la1,lo1,la2,lo2)*1.08;
   }
-  // Atlantic/Black Sea ↔ Indian/Pacific → Suez or Cape
-  else if((atA||bsA)&&(inB||paB) || (atB||bsB)&&(inA||paA)){
-    const viaSuez = haversine(la1,lo1,WP.suez.lat,WP.suez.lon)
-                  + haversine(WP.suez.lat,WP.suez.lon,la2,lo2);
-    const viaCape = haversine(la1,lo1,WP.cape.lat,WP.cape.lon)
-                  + haversine(WP.cape.lat,WP.cape.lon,la2,lo2);
-    if(viaSuez < viaCape*1.10){
-      nm=viaSuez*1.04; canals=['suez'];
-      // Check if Red Sea routing adds war risk
-      if(rA==='RED SEA'||rB==='RED SEA'||(canals.includes('suez')&&(inA||inB))) warZones.push('redsea');
-    } else {nm=viaCape*0.94;}
-  }
-  // Black Sea → needs Bosphorus → add to Med distance
-  else if(bsA||bsB){
-    nm = direct * 1.12;
-    if((bsA&&(inB||paB))||(bsB&&(inA||paA))) canals=['suez'];
-  }
-  // Same basin / nearby
-  else {
-    nm = direct * 1.08; // coastal routing factor
-  }
-
-  // Red Sea war zone check
   if(rA==='RED SEA'||rB==='RED SEA') if(!warZones.includes('redsea')) warZones.push('redsea');
   if(rA==='BLACK SEA'||rB==='BLACK SEA') if(!warZones.includes('blacksea')) warZones.push('blacksea');
-
-  return {nm: Math.round(nm), canals, warZones};
+  return {nm:Math.round(nm),canals,warZones,routeDesc};
 }
 
 // ══════════════════════════════════════════════════
-// MARKET DEFAULTS
+// INITIAL COMPUTE (determines routing + defaults)
 // ══════════════════════════════════════════════════
-const VLSFO = 615, MGO = 870, COMM = 3.75, BALL = 0.65, WX = 1.05;
+function compute(lp,dp,cargoMt){
+  const vr=vesselForCargo(cargoMt);
+  const sp=VESSEL_SPECS[vr.v];
+  const {rate:tcRate,fixture}=matchTC(lp.region,dp.region,vr.v);
+  const {nm,canals,warZones,routeDesc}=routedDistance(lp,dp);
+  const canalCosts={};
+  for(const c of canals) canalCosts[c]=(TOLLS[c]||{})[vr.v]||0;
+  const warCosts={};
+  for(const z of warZones) warCosts[z]=Math.round((WAR[z].hull)+(cargoMt*WAR[z].cargoPerMt));
+  return {vr,sp,tcRate,fixture,nm,canals,warZones,canalCosts,warCosts,routeDesc,
+          daLoad:DA[lp.region]||40000,daDisch:DA[dp.region]||40000,
+          lRate:PORT_RATE[lp.region]||6000,dRate:PORT_RATE[dp.region]||6000};
+}
 
 // ══════════════════════════════════════════════════
-// COMPUTATION
+// RECOMPUTE FROM EDIT STATE
 // ══════════════════════════════════════════════════
-function compute(lp, dp, cargoMt){
-  const vr   = vesselForCargo(cargoMt);
-  const sp   = VESSEL_SPECS[vr.v];
-  const tcRate = matchTC(lp.region, dp.region, vr.v);
-  const {nm, canals, warZones} = routedDistance(lp, dp);
-
+function recompute(s){
   // Days
-  const ladenDays = nm * WX / (sp.ladenKn * 24);
-  const ballDays  = nm * BALL / (sp.ballKn * 24);
-  const lRate = PORT_RATE[lp.region] || 6000;
-  const dRate = PORT_RATE[dp.region] || 6000;
-  const portDays  = (cargoMt/lRate + 0.75) + (cargoMt/dRate + 0.75);
+  const ladenDays = s.nm * s.wxFactor / (s.ladenKn * 24);
+  const ballDays  = s.nm * s.ballFactor / (s.ballKn * 24);
+  const portDays  = (s.cargoMt/s.lRate + 0.75) + (s.cargoMt/s.dRate + 0.75);
   const totalDays = ladenDays + ballDays + portDays;
-
-  // Block 1 — TC hire
-  const hire = Math.round(tcRate * totalDays);
-
-  // Block 2 — Bunkers
-  const ecaLd = ECA.has(lp.region) ? 1.5 : 0;
-  const ecaDd = ECA.has(dp.region) ? 1.5 : 0;
+  // Hire
+  const hire = s.tcRate * totalDays;
+  // Bunkers
+  const ecaLd = ECA.has(s.lp.region)?1.5:0;
+  const ecaDd = ECA.has(s.dp.region)?1.5:0;
   const ecaDays = Math.min(ladenDays+ballDays, ecaLd+ecaDd);
   const mainDays = Math.max(0, ladenDays+ballDays-ecaDays);
-  const vlsfoQt = Math.round(mainDays*(sp.ladenCons*ladenDays+sp.ballCons*ballDays)/(ladenDays+ballDays||1));
-  const ecaMgoQt= Math.round(ecaDays*sp.ladenCons);
-  const portMdoQt=Math.round(portDays*sp.portCons);
-  const bunkers = Math.round(vlsfoQt*VLSFO + ecaMgoQt*MGO + portMdoQt*MGO);
-
-  // Block 3 — Port DAs
-  const daLoad  = DA[lp.region] || 40000;
-  const daDisch = DA[dp.region] || 40000;
-  const portDAs = daLoad + daDisch;
-
-  // Block 4 — Canal tolls
-  const TOLLS = {suez:{HANDY:155000,SUPRAMAX:230000,ULTRAMAX:270000,PANAMAX:325000,CAPESIZE:420000},
-                 panama:{HANDY:130000,SUPRAMAX:185000,ULTRAMAX:215000,PANAMAX:270000,CAPESIZE:0}};
-  let canalCost = 0;
-  const canalLines = [];
-  for(const c of canals){
-    const t = (TOLLS[c]||{})[vr.v]||0;
-    canalCost += t;
-    if(t) canalLines.push({name:c.charAt(0).toUpperCase()+c.slice(1)+' Canal', usd:t});
-  }
-
-  // Block 5 — War risk
-  let warCost = 0;
-  const warLines = [];
-  for(const z of warZones){
-    const w = WAR[z];
-    if(!w) continue;
-    const wc = Math.round(w.hull + cargoMt*w.cargoPerMt);
-    warCost += wc;
-    warLines.push({name:w.label, usd:wc});
-  }
-
-  // Block 6 — Commission
+  const seaDays = ladenDays+ballDays||1;
+  const vlsfoQt  = Math.round(mainDays*(s.ladenCons*ladenDays+s.ballCons*ballDays)/seaDays);
+  const ecaMgoQt = Math.round(ecaDays*s.ladenCons);
+  const portMdoQt= Math.round(portDays*s.portCons);
+  const bunkers = Math.round(vlsfoQt*s.vlsfoPrice + ecaMgoQt*s.mgoPrice + portMdoQt*s.mgoPrice);
+  // DAs
+  const portDAs = s.daLoad + s.daDisch;
+  // Canals
+  let canalCost=0; for(const k in s.canalCosts) canalCost+=Number(s.canalCosts[k])||0;
+  // War
+  let warCost=0; for(const k in s.warCosts) warCost+=Number(s.warCosts[k])||0;
+  // Commission
   const subtotal = hire+bunkers+portDAs+canalCost+warCost;
-  const commission = Math.round(subtotal * COMM/100);
+  const commission = subtotal * s.commPct/100;
   const total = subtotal + commission;
-  const perMt = total/cargoMt;
-
-  return {vr,tcRate,nm,canals,warZones,ladenDays,ballDays,portDays,totalDays,
-          hire,bunkers,portDAs,daLoad,daDisch,canalCost,canalLines,warCost,warLines,
-          commission,total,perMt,vlsfoQt,ecaMgoQt,portMdoQt,lRate,dRate,sp};
+  const perMt = total / s.cargoMt;
+  return {ladenDays,ballDays,portDays,totalDays,hire,vlsfoQt,ecaMgoQt,portMdoQt,bunkers,portDAs,canalCost,warCost,commission,total,perMt,ecaDays};
 }
+
+// ══════════════════════════════════════════════════
+// EDIT STATE
+// ══════════════════════════════════════════════════
+let editState = null;
 
 // ══════════════════════════════════════════════════
 // PORT SEARCH UI
 // ══════════════════════════════════════════════════
-let portSel = {load:null, disch:null};
-
-function filterPorts(wh, q){
-  const ql = q.toLowerCase().trim();
-  const list = ql
-    ? PORTS.filter(p => p.name.toLowerCase().includes(ql)||p.country.toLowerCase().includes(ql))
-    : PORTS;
-  renderDD(wh, list.slice(0,80), ql);
+let portSel={load:null,disch:null};
+function filterPorts(wh,q){
+  const ql=q.toLowerCase().trim();
+  const list=ql?PORTS.filter(p=>p.name.toLowerCase().includes(ql)||p.country.toLowerCase().includes(ql)):PORTS;
+  renderDD(wh,list.slice(0,80),ql);
   document.getElementById(wh+'DD').classList.add('open');
 }
 function openDD(wh){
   if(!document.getElementById(wh+'Search').classList.contains('chosen'))
-    renderDD(wh, PORTS.slice(0,80), '');
+    renderDD(wh,PORTS.slice(0,80),'');
   document.getElementById(wh+'DD').classList.add('open');
 }
-function closeDD(wh){ setTimeout(()=>document.getElementById(wh+'DD').classList.remove('open'),260); }
-function renderDD(wh, list, q){
-  const el = document.getElementById(wh+'DD'); el.innerHTML='';
-  if(!list.length){ el.innerHTML='<div class="ddi"><span class="ddi-meta">No ports found</span></div>'; return; }
+function closeDD(wh){setTimeout(()=>document.getElementById(wh+'DD').classList.remove('open'),260);}
+function renderDD(wh,list,q){
+  const el=document.getElementById(wh+'DD'); el.innerHTML='';
+  if(!list.length){el.innerHTML='<div class="ddi"><span class="ddi-meta">No ports found</span></div>';return;}
   list.forEach(p=>{
-    const d=document.createElement('div'); d.className='ddi';
-    const nm = q ? p.name.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<b style="color:#f5c842">$1</b>') : p.name;
-    d.innerHTML=`<span><span class="ddi-name">${nm}</span><span class="ddi-meta">${p.country}</span></span><span class="ddi-tag">${p.region||''}</span>`;
+    const d=document.createElement('div');d.className='ddi';
+    const nm=q?p.name.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<b style="color:#f5c842">$1</b>'):p.name;
+    d.innerHTML=`<span><span class="ddi-name">${nm}</span><span class="ddi-meta">&nbsp;${p.country}</span></span><span class="ddi-tag">${p.region||''}</span>`;
     d.onmousedown=e=>{e.preventDefault();pickPort(wh,p);};
     el.appendChild(d);
   });
 }
-function pickPort(wh, p){
+function pickPort(wh,p){
   portSel[wh]=p;
   const si=document.getElementById(wh+'Search');
   si.value=p.name; si.classList.add('chosen');
@@ -441,101 +746,270 @@ function pickPort(wh, p){
 function checkReady(){
   document.getElementById('calcBtn').disabled=!(portSel.load&&portSel.disch);
 }
+function onCargoChange(){
+  const mt=parseInt(document.getElementById('cargoMt').value)||50000;
+  const vr=vesselForCargo(mt);
+  document.getElementById('vaName').textContent=vr.label;
+  document.getElementById('vaDetail').textContent=vr.desc;
+  // No auto-recalc — user must click Calculate
+}
 
 // ══════════════════════════════════════════════════
-// VESSEL AUTO-UPDATE
+// SECTION TOGGLE
 // ══════════════════════════════════════════════════
-function onCargoChange(){
-  const mt = parseInt(document.getElementById('cargoMt').value)||50000;
-  const vr = vesselForCargo(mt);
-  document.getElementById('vaName').textContent = vr.label;
-  document.getElementById('vaDetail').textContent = vr.desc;
-  if(portSel.load&&portSel.disch&&document.getElementById('results').style.display!=='none') doCalc();
+function toggleSec(hdr){
+  hdr.classList.toggle('open');
+  hdr.nextElementSibling.classList.toggle('open');
 }
 
 // ══════════════════════════════════════════════════
 // FORMAT HELPERS
 // ══════════════════════════════════════════════════
-const F  = n => n>=1000 ? Math.round(n).toLocaleString('en') : n.toFixed(2);
-const Fm = n => '$'+Math.round(n).toLocaleString('en');
-const Fd = n => n.toFixed(1);
+const Fm=n=>'$'+Math.round(n).toLocaleString('en-US');
+const Fd=n=>n.toFixed(1);
+const Fn=n=>n.toLocaleString('en-US');
 
 // ══════════════════════════════════════════════════
-// CALCULATE
+// MAIN CALCULATE
 // ══════════════════════════════════════════════════
 function doCalc(){
   if(!portSel.load||!portSel.disch) return;
-  const cargoMt = parseInt(document.getElementById('cargoMt').value)||50000;
-  const R = compute(portSel.load, portSel.disch, cargoMt);
+  const cargoMt=parseInt(document.getElementById('cargoMt').value)||50000;
+  const C=compute(portSel.load,portSel.disch,cargoMt);
 
-  // Route info
-  const routeParts = [portSel.load.name+' → '+portSel.disch.name];
-  if(R.canals.length) routeParts.push('via '+R.canals.map(c=>c.charAt(0).toUpperCase()+c.slice(1)).join('+'));
-  routeParts.push(F(R.nm)+' nm');
-  document.getElementById('routeInfo').textContent = routeParts.join('  ·  ');
+  // Build edit state with defaults from computed
+  editState={
+    lp: portSel.load,
+    dp: portSel.disch,
+    cargoMt,
+    vr: C.vr,
+    nm: C.nm,
+    routeDesc: C.routeDesc,
+    canals: C.canals,
+    warZones: C.warZones,
+    fixture: C.fixture,
+    tcRate: C.tcRate,
+    ladenKn: C.sp.ladenKn,
+    ballKn: C.sp.ballKn,
+    wxFactor: 1.05,
+    ballFactor: 0.65,
+    lRate: C.lRate,
+    dRate: C.dRate,
+    vlsfoPrice: 615,
+    mgoPrice: 870,
+    ladenCons: C.sp.ladenCons,
+    ballCons: C.sp.ballCons,
+    portCons: C.sp.portCons,
+    daLoad: C.daLoad,
+    daDisch: C.daDisch,
+    canalCosts: {...C.canalCosts},
+    warCosts: {...C.warCosts},
+    commPct: 3.75,
+  };
+
+  // Populate route badges
+  const rb=document.getElementById('routeBadges');
+  rb.innerHTML=`<span class="rbadge">${portSel.load.name} → ${portSel.disch.name}</span>`
+    +(C.canals.length?`<span class="rbadge via">${C.routeDesc}</span>`:`<span class="rbadge">${C.routeDesc}</span>`)
+    +`<span class="rbadge">${Fn(C.nm)} nm</span>`
+    +`<span class="rbadge">${C.vr.label}</span>`;
 
   // Warnings
-  const warns = [];
-  if(R.warZones.includes('redsea')) warns.push('⚠ Red Sea routing — war risk premium included. Many vessels currently diverting via Cape (+3,500 nm).');
-  if(R.warZones.includes('blacksea')) warns.push('⚠ Black Sea routing — war risk premium included.');
-  const wb = document.getElementById('warnBox');
-  if(warns.length){ wb.innerHTML=warns.join('<br>'); wb.style.display='block'; }
-  else wb.style.display='none';
+  const warns=[];
+  if(C.warZones.includes('redsea')) warns.push('⚠ Red Sea routing — Houthi threat area. War risk premium included. Many vessels diverting via Cape (+3,500 nm).');
+  if(C.warZones.includes('blacksea')) warns.push('⚠ Black Sea routing — war risk premium included.');
+  const wb=document.getElementById('warnBox');
+  wb.style.display=warns.length?'block':'none';
+  wb.innerHTML=warns.join('<br>');
+
+  // Populate static info spans
+  document.getElementById('o-nm').textContent=Fn(C.nm)+' nm';
+  document.getElementById('o-routedetail').textContent=C.routeDesc;
+  document.getElementById('o-lportname').textContent=portSel.load.name+' ('+portSel.load.region+')';
+  document.getElementById('o-dportname').textContent=portSel.disch.name+' ('+portSel.disch.region+')';
+  document.getElementById('o-daloadnote').textContent=portSel.load.name+' ('+portSel.load.region+')';
+  document.getElementById('o-dadischnote').textContent=portSel.disch.name+' ('+portSel.disch.region+')';
+
+  // TC fixture note
+  if(C.fixture){
+    document.getElementById('o-tcnote').textContent=
+      'Nearest fixture: '+C.fixture.vt+' '+C.fixture.oR+' → '+C.fixture.dR;
+  }
+
+  // Populate editable inputs
+  setInput('p-tcrate',    C.tcRate);
+  setInput('p-ladenspd',  C.sp.ladenKn);
+  setInput('p-ballspd',   C.sp.ballKn);
+  setInput('p-wx',        1.05);
+  setInput('p-ball',      0.65);
+  setInput('p-lrate',     C.lRate);
+  setInput('p-drate',     C.dRate);
+  setInput('p-vlsfopx',   615);
+  setInput('p-mgopx',     870);
+  setInput('p-ladencons', C.sp.ladenCons);
+  setInput('p-ballcons',  C.sp.ballCons);
+  setInput('p-portcons',  C.sp.portCons);
+  setInput('p-daload',    C.daLoad);
+  setInput('p-dadisch',   C.daDisch);
+  setInput('p-commpct',   3.75);
+
+  // Handle canal section
+  const sec4=document.getElementById('sec4');
+  if(C.canals.length>0){
+    sec4.style.display='block';
+    let html='<div class="param-block"><div class="param-block-title">Toll by Vessel Class</div>';
+    for(const c of C.canals){
+      const cname=c.charAt(0).toUpperCase()+c.slice(1);
+      html+=`<div class="param-row">
+        <span class="param-lbl">${cname} Canal toll</span>
+        <div class="p-inline"><input id="p-canal-${c}" class="p-in" type="number" step="5000" value="${C.canalCosts[c]||0}" oninput="onParamChange()"><span class="p-unit">USD</span></div>
+        <span class="param-note">${C.vr.label} class rate</span>
+      </div>`;
+    }
+    html+=`<div class="param-row subtotal-row"><span class="param-lbl">Total canal tolls</span><span class="param-val-display" id="o-canals2">—</span></div>`;
+    html+='</div>';
+    document.getElementById('sec4body').innerHTML=html;
+  } else {
+    sec4.style.display='none';
+  }
+
+  // Handle war section
+  const sec5=document.getElementById('sec5');
+  if(C.warZones.length>0){
+    sec5.style.display='block';
+    let html='<div class="param-block"><div class="param-block-title">War Risk Premium</div>';
+    for(const z of C.warZones){
+      const w=WAR[z];
+      html+=`<div class="param-row">
+        <span class="param-lbl">${w.label}</span>
+        <div class="p-inline"><input id="p-war-${z}" class="p-in" type="number" step="5000" value="${C.warCosts[z]||0}" oninput="onParamChange()"><span class="p-unit">USD</span></div>
+        <span class="param-note">Hull + cargo (${w.cargoPerMt*100}¢/MT)</span>
+      </div>`;
+    }
+    html+=`<div class="param-row subtotal-row"><span class="param-lbl">Total war risk</span><span class="param-val-display" id="o-war2">—</span></div>`;
+    html+='</div>';
+    document.getElementById('sec5body').innerHTML=html;
+  } else {
+    sec5.style.display='none';
+  }
+
+  // Update section numbers for commission
+  let secIdx=4;
+  if(C.canals.length) secIdx++;
+  if(C.warZones.length) secIdx++;
+  document.getElementById('sec6num').textContent='0'+secIdx;
+
+  // Show results
+  document.getElementById('results').style.display='block';
+
+  // Run first calculation pass
+  onParamChange();
+
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function setInput(id,val){
+  const el=document.getElementById(id);
+  if(el) el.value=val;
+}
+
+// ══════════════════════════════════════════════════
+// PARAM CHANGE — read inputs, recompute, update spans
+// ══════════════════════════════════════════════════
+function onParamChange(){
+  if(!editState) return;
+  // Read all inputs into editState
+  editState.tcRate    = rv('p-tcrate',    editState.tcRate);
+  editState.ladenKn   = rv('p-ladenspd',  editState.ladenKn);
+  editState.ballKn    = rv('p-ballspd',   editState.ballKn);
+  editState.wxFactor  = rv('p-wx',        editState.wxFactor);
+  editState.ballFactor= rv('p-ball',      editState.ballFactor);
+  editState.lRate     = rv('p-lrate',     editState.lRate);
+  editState.dRate     = rv('p-drate',     editState.dRate);
+  editState.vlsfoPrice= rv('p-vlsfopx',   editState.vlsfoPrice);
+  editState.mgoPrice  = rv('p-mgopx',     editState.mgoPrice);
+  editState.ladenCons = rv('p-ladencons', editState.ladenCons);
+  editState.ballCons  = rv('p-ballcons',  editState.ballCons);
+  editState.portCons  = rv('p-portcons',  editState.portCons);
+  editState.daLoad    = rv('p-daload',    editState.daLoad);
+  editState.daDisch   = rv('p-dadisch',   editState.daDisch);
+  editState.commPct   = rv('p-commpct',   editState.commPct);
+  for(const c of editState.canals)
+    editState.canalCosts[c]=rv('p-canal-'+c, editState.canalCosts[c]||0);
+  for(const z of editState.warZones)
+    editState.warCosts[z]=rv('p-war-'+z, editState.warCosts[z]||0);
+
+  const R=recompute(editState);
 
   // Hero
-  document.getElementById('heroBar').innerHTML=`
-    <div class="hero-item"><div class="val">${R.perMt.toFixed(2)}</div><div class="lbl">$/MT</div></div>
-    <div class="hero-item"><div class="val">${Fm(R.total)}</div><div class="lbl">Total Voyage Cost</div></div>
-    <div class="hero-item"><div class="val">${Fd(R.totalDays)}d</div><div class="lbl">Total Days · ${R.vr.label}</div></div>`;
+  set('o-permt',    R.perMt.toFixed(2));
+  set('o-total',    Fm(R.total));
+  set('o-days',     Fd(R.totalDays)+'d');
+  set('o-dayslbl',  'Total Days · '+editState.vr.label);
 
-  // Breakdown
-  const rows = [];
-  const row = (label, detail, val, cls='') =>
-    `<div class="bk-row ${cls}"><span class="bk-label">${label}</span><span class="bk-detail">${detail}</span><span class="bk-val">${val}</span></div>`;
+  // Sec 1: TC Hire
+  set('o-hire',      Fm(R.hire));
+  set('o-ladendays', Fd(R.ladenDays)+' d');
+  set('o-balldays',  Fd(R.ballDays)+' d');
+  set('o-portdays',  Fd(R.portDays)+' d');
+  set('o-totaldays', Fd(R.totalDays)+' d  ('+Fd(R.ladenDays)+' laden + '+Fd(R.ballDays)+' ballast + '+Fd(R.portDays)+' port)');
 
-  rows.push(row('TC Hire',
-    `${Fm(R.tcRate)}/day × ${Fd(R.totalDays)}d (${Fd(R.ladenDays)}d laden + ${Fd(R.ballDays)}d ballast + ${Fd(R.portDays)}d port)`,
-    Fm(R.hire)));
+  // Sec 2: Bunkers
+  set('o-bunk',  Fm(R.bunkers));
+  set('o-bunk2', Fm(R.bunkers));
+  set('o-vlsfomt',    Fn(R.vlsfoQt)+' MT');
+  set('o-vlsfocost',  Fm(R.vlsfoQt*editState.vlsfoPrice));
+  set('o-portmdoamt', Fn(R.portMdoQt)+' MT');
+  set('o-portmdocost',Fm(R.portMdoQt*editState.mgoPrice));
+  const rowMgo=document.getElementById('row-mgo');
+  if(rowMgo){
+    rowMgo.style.display=R.ecaDays>0?'grid':'none';
+    set('o-ecomt',   Fn(R.ecaMgoQt)+' MT');
+    set('o-ecocost', Fm(R.ecaMgoQt*editState.mgoPrice));
+  }
 
-  rows.push(row('Bunkers — VLSFO',
-    `${F(R.vlsfoQt)} MT × $615/MT`,
-    Fm(R.vlsfoQt*615)));
-  if(R.ecaMgoQt>0)
-    rows.push(row('Bunkers — ECA MGO',
-      `${F(R.ecaMgoQt)} MT × $870/MT`,
-      Fm(R.ecaMgoQt*870)));
-  rows.push(row('Bunkers — Port MDO',
-    `${F(R.portMdoQt)} MT × $870/MT`,
-    Fm(R.portMdoQt*870)));
+  // Sec 3: DAs
+  set('o-das',  Fm(R.portDAs));
+  set('o-das2', Fm(R.portDAs));
 
-  rows.push(row('Port DAs — Load',
-    `${portSel.load.name} (${portSel.load.region})`,
-    Fm(R.daLoad)));
-  rows.push(row('Port DAs — Discharge',
-    `${portSel.disch.name} (${portSel.disch.region})`,
-    Fm(R.daDisch)));
+  // Sec 4: Canals
+  if(editState.canals.length){
+    set('o-canals', Fm(R.canalCost));
+    if(document.getElementById('o-canals2')) set('o-canals2', Fm(R.canalCost));
+  }
 
-  if(R.canalLines.length)
-    R.canalLines.forEach(c=>rows.push(row(c.name+' Toll','',Fm(c.usd))));
+  // Sec 5: War
+  if(editState.warZones.length){
+    set('o-war', Fm(R.warCost));
+    if(document.getElementById('o-war2')) set('o-war2', Fm(R.warCost));
+  }
 
-  if(R.warLines.length)
-    R.warLines.forEach(w=>rows.push(row('War Risk — '+w.name,'Hull + cargo insurance',Fm(w.usd))));
+  // Sec 6: Commission
+  set('o-comm',  Fm(R.commission));
+  set('o-comm2', Fm(R.commission));
 
-  rows.push(row('Address Commission',`${COMM}%`,Fm(R.commission)));
+  // Grand total
+  set('o-grandtotal', Fm(R.total));
+  set('o-grandpermt', R.perMt.toFixed(2)+' $/MT');
+  set('o-gtcargo', Fn(editState.cargoMt)+' MT · '+editState.vr.label);
+}
 
-  rows.push(row('<b>Total Voyage Cost</b>','',`<b>${Fm(R.total)}</b>`,'total'));
-  rows.push(row('<b>Freight Rate</b>',`${F(cargoMt)} MT`,`<b>${R.perMt.toFixed(2)} $/MT</b>`,'permt'));
-
-  document.getElementById('breakdown').innerHTML = rows.join('');
-  document.getElementById('results').style.display='block';
-  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+function rv(id, fallback){
+  const el=document.getElementById(id);
+  if(!el) return fallback;
+  const v=parseFloat(el.value);
+  return isNaN(v)||v<=0 ? fallback : v;
+}
+function set(id,val){
+  const el=document.getElementById(id);
+  if(el) el.textContent=val;
 }
 
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
-renderDD('load', PORTS.slice(0,80), '');
-renderDD('disch', PORTS.slice(0,80), '');
+renderDD('load',PORTS.slice(0,80),'');
+renderDD('disch',PORTS.slice(0,80),'');
 </script>
 </body>
 </html>
