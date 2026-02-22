@@ -618,37 +618,139 @@ function haversine(la1,lo1,la2,lo2){
   const a=Math.sin(dLa/2)**2+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dLo/2)**2;
   return 2*R*Math.asin(Math.sqrt(a));
 }
-const WP={suez:{lat:30.0,lon:32.5},panama:{lat:9.0,lon:-79.5},cape:{lat:-34.5,lon:20.0}};
+const WP={
+  suez:    {lat:30.0,  lon:32.5},   // Suez Canal entrance
+  aden:    {lat:12.5,  lon:44.5},   // Bab-el-Mandeb / Gulf of Aden
+  malacca: {lat:1.5,   lon:103.8},  // Strait of Malacca
+  gib:     {lat:36.0,  lon:-5.4},   // Gibraltar
+  istanbul:{lat:41.0,  lon:28.97},  // Bosphorus
+  panama:  {lat:9.0,   lon:-79.5},  // Panama Canal
+  cape:    {lat:-34.5, lon:20.0},   // Cape of Good Hope
+};
+
+// ── Routing zone for a port ──────────────────────
+// Splits the world into 6 zones based on which canals
+// a vessel would actually use to get there.
+function routeZone(p){
+  const r=p.region||'', b=p.basin||'';
+  if(r==='W.S.AMERICA') return 'PAC_AMER';
+  if(r==='MEXICO' && b==='PACIFIC') return 'PAC_AMER';
+  if(['SE.ASIA','CHINA','N.ASIA','AUSTRALIA'].includes(r)) return 'ASIA';
+  if(['W.INDIA','E.INDIA','S.INDIA','RED SEA','MIDDLE EAST','E.AFRICA'].includes(r)) return 'INDIAN';
+  if(r==='S.AFRICA' && b==='INDIAN') return 'INDIAN';
+  if(['N.EUROPE','BALTIC','W.MED','E.MED'].includes(r)) return 'EUR_MED';
+  if(r==='BLACK SEA') return 'BLACK';
+  if(r==='W.AFRICA' || (r==='S.AFRICA' && b==='ATLANTIC')) return 'W_AFRICA';
+  if(['US GULF','US EAST COAST','E.N.AMERICA','E.S.AMERICA','N.S.AMERICA','CARIBBEAN','MEXICO'].includes(r)) return 'ATL_AMER';
+  return 'EUR_MED';
+}
+
+// ── Distance via Suez with realistic multi-waypoint paths ─────────────
+// Haversine alone badly underestimates Suez routes from Europe because
+// it cuts straight through the Mediterranean landmass.
+// Fix: route explicitly through Gibraltar → Suez → Aden → [Malacca]
+function distViaSuez(pA,pB,zA,zB){
+  const h=haversine;
+  const isEurSide=z=>['EUR_MED','BLACK','W_AFRICA'].includes(z);
+  const isEastSide=z=>['INDIAN','ASIA'].includes(z);
+  const eurZ=isEurSide(zA)?zA:zB, eastZ=isEastSide(zA)?zA:zB;
+  const eurP=isEurSide(zA)?pA:pB, eastP=isEastSide(zA)?pA:pB;
+
+  // Origin → Suez Canal entrance
+  let dToSuez;
+  if(eurZ==='BLACK'){
+    dToSuez = h(eurP.lat,eurP.lon,WP.istanbul.lat,WP.istanbul.lon)
+            + h(WP.istanbul.lat,WP.istanbul.lon,WP.gib.lat,WP.gib.lon)
+            + h(WP.gib.lat,WP.gib.lon,WP.suez.lat,WP.suez.lon);
+  } else {
+    // EUR_MED or W_AFRICA: must traverse Mediterranean via Gibraltar
+    dToSuez = h(eurP.lat,eurP.lon,WP.gib.lat,WP.gib.lon)
+            + h(WP.gib.lat,WP.gib.lon,WP.suez.lat,WP.suez.lon);
+  }
+
+  // Suez Canal exit → destination
+  let dFromSuez;
+  const rEast=eastP.region||'';
+  if(rEast==='RED SEA'){
+    // Red Sea is a narrow winding corridor — actual sailing ≈ 2× haversine
+    dFromSuez = h(WP.suez.lat,WP.suez.lon,eastP.lat,eastP.lon)*2.0;
+  } else if(eastZ==='INDIAN'){
+    // India / Middle East / E.Africa: Aden is the natural waypoint
+    dFromSuez = h(WP.suez.lat,WP.suez.lon,WP.aden.lat,WP.aden.lon)
+              + h(WP.aden.lat,WP.aden.lon,eastP.lat,eastP.lon);
+  } else {
+    // SE.Asia / China / Japan / Australia: Aden → Malacca → destination
+    dFromSuez = h(WP.suez.lat,WP.suez.lon,WP.aden.lat,WP.aden.lon)
+              + h(WP.aden.lat,WP.aden.lon,WP.malacca.lat,WP.malacca.lon)
+              + h(WP.malacca.lat,WP.malacca.lon,eastP.lat,eastP.lon);
+  }
+  return Math.round((dToSuez+dFromSuez)*1.05);
+}
 
 function routedDistance(pA,pB){
   const la1=pA.lat,lo1=pA.lon,la2=pB.lat,lo2=pB.lon;
-  const rA=pA.region||'',rB=pB.region||'';
-  const isAtl=r=>['N.EUROPE','BALTIC','W.MED','US GULF','US EAST COAST','E.S.AMERICA','N.S.AMERICA','W.AFRICA','S.AFRICA','E.N.AMERICA','CARIBBEAN','MEXICO'].some(x=>r.includes(x));
-  const isPac=r=>['CHINA','N.ASIA','SE.ASIA','AUSTRALIA','W.S.AMERICA','MEXICO'].some(x=>r.includes(x));
-  const isInd=r=>['W.INDIA','E.INDIA','RED SEA','MIDDLE EAST','E.AFRICA','S.INDIA'].some(x=>r.includes(x));
-  const isBlk=r=>r==='BLACK SEA';
-  const atA=isAtl(rA),atB=isAtl(rB),paA=isPac(rA),paB=isPac(rB),inA=isInd(rA),inB=isInd(rB),bsA=isBlk(rA),bsB=isBlk(rB);
-  let nm,canals=[],warZones=[],routeDesc='Direct';
-  if((atA&&paB)||(paA&&atB)){
-    const vP=haversine(la1,lo1,WP.panama.lat,WP.panama.lon)+haversine(WP.panama.lat,WP.panama.lon,la2,lo2);
-    const vC=haversine(la1,lo1,WP.cape.lat,WP.cape.lon)+haversine(WP.cape.lat,WP.cape.lon,la2,lo2);
-    if(vP<vC*1.05){nm=vP*1.03;canals=['panama'];routeDesc='via Panama Canal';}
-    else{nm=vC*0.94;routeDesc='via Cape of Good Hope';}
-  } else if((atA||bsA)&&(inB||paB)||(atB||bsB)&&(inA||paA)){
-    const vS=haversine(la1,lo1,WP.suez.lat,WP.suez.lon)+haversine(WP.suez.lat,WP.suez.lon,la2,lo2);
-    const vC=haversine(la1,lo1,WP.cape.lat,WP.cape.lon)+haversine(WP.cape.lat,WP.cape.lon,la2,lo2);
-    if(vS<vC*1.10){nm=vS*1.04;canals=['suez'];routeDesc='via Suez Canal';
-      if(rA==='RED SEA'||rB==='RED SEA') warZones.push('redsea');
-    } else {nm=vC*0.94;routeDesc='via Cape of Good Hope';}
-  } else if(bsA||bsB){
-    nm=haversine(la1,lo1,la2,lo2)*1.12; routeDesc='via Bosphorus';
-    if((bsA&&(inB||paB))||(bsB&&(inA||paA))){canals=['suez'];routeDesc='via Bosphorus + Suez';}
-  } else {
-    nm=haversine(la1,lo1,la2,lo2)*1.08;
+  const zA=routeZone(pA), zB=routeZone(pB);
+  const rA=pA.region||'', rB=pB.region||'';
+  const either=set=>set.includes(zA)||set.includes(zB);
+  const pair=(a,b)=>(zA===a&&zB===b)||(zA===b&&zB===a);
+  let nm, canals=[], warZones=[], routeDesc='Direct';
+
+  const capeNm=()=>Math.round((haversine(la1,lo1,WP.cape.lat,WP.cape.lon)+haversine(WP.cape.lat,WP.cape.lon,la2,lo2))*1.10);
+  const panNm =()=>Math.round((haversine(la1,lo1,WP.panama.lat,WP.panama.lon)+haversine(WP.panama.lat,WP.panama.lon,la2,lo2))*1.04);
+
+  // ─ 1. Atlantic Americas ↔ Pacific Americas → Panama ─
+  if(pair('ATL_AMER','PAC_AMER')){
+    nm=panNm(); canals=['panama']; routeDesc='via Panama Canal';
   }
-  if(rA==='RED SEA'||rB==='RED SEA') if(!warZones.includes('redsea')) warZones.push('redsea');
-  if(rA==='BLACK SEA'||rB==='BLACK SEA') if(!warZones.includes('blacksea')) warZones.push('blacksea');
-  return {nm:Math.round(nm),canals,warZones,routeDesc};
+  // ─ 2. European/Med/Black/W.Africa ↔ Indian Ocean → Suez preferred ─
+  else if(either(['EUR_MED','BLACK','W_AFRICA']) && either(['INDIAN'])){
+    const s=distViaSuez(pA,pB,zA,zB), c=capeNm();
+    if(s<c*1.15){ nm=s; canals=['suez']; routeDesc='via Suez Canal'; }
+    else { nm=c; routeDesc='via Cape of Good Hope'; }
+  }
+  // ─ 3. European/Med/Black/W.Africa ↔ Pacific Asia → Suez (never Panama) ─
+  else if(either(['EUR_MED','BLACK','W_AFRICA']) && either(['ASIA'])){
+    const s=distViaSuez(pA,pB,zA,zB), c=capeNm();
+    if(s<c*1.15){ nm=s; canals=['suez']; routeDesc='via Suez Canal'; }
+    else { nm=c; routeDesc='via Cape of Good Hope'; }
+  }
+  // ─ 4. Atlantic Americas ↔ Indian Ocean → Suez or Cape ─
+  else if(pair('ATL_AMER','INDIAN') || pair('ATL_AMER','W_AFRICA')){
+    const s=Math.round((haversine(la1,lo1,WP.suez.lat,WP.suez.lon)+haversine(WP.suez.lat,WP.suez.lon,la2,lo2))*1.05);
+    const c=capeNm();
+    if(s<c*1.12){ nm=s; canals=['suez']; routeDesc='via Suez Canal'; }
+    else { nm=c; routeDesc='via Cape of Good Hope'; }
+  }
+  // ─ 5. Atlantic Americas ↔ Pacific Asia → Panama or Cape only ─
+  // (Suez excluded: from Americas it would mean crossing entire Atlantic + Med,
+  //  haversine underestimates that badly. In practice always Panama or Cape.)
+  else if(pair('ATL_AMER','ASIA')){
+    const p=panNm(), c=capeNm();
+    if(p<=c*1.05){ nm=p; canals=['panama']; routeDesc='via Panama Canal'; }
+    else { nm=c; routeDesc='via Cape of Good Hope'; }
+  }
+  // ─ 6. Indian Ocean ↔ Pacific Asia → direct (Malacca/Lombok) ─
+  else if(either(['INDIAN']) && either(['ASIA'])){
+    nm=Math.round(haversine(la1,lo1,la2,lo2)*1.10);
+  }
+  // ─ 7. Black Sea ↔ Med/Atlantic → via Bosphorus ─
+  else if(either(['BLACK']) && either(['EUR_MED','ATL_AMER','W_AFRICA'])){
+    nm=Math.round((haversine(la1,lo1,WP.istanbul.lat,WP.istanbul.lon)+haversine(WP.istanbul.lat,WP.istanbul.lon,la2,lo2))*1.10);
+    routeDesc='via Bosphorus';
+  }
+  // ─ 8. Same basin / regional ─
+  else {
+    nm=Math.round(haversine(la1,lo1,la2,lo2)*1.10);
+  }
+
+  // War zone overlays
+  if(rA==='RED SEA'||rB==='RED SEA') warZones.push('redsea');
+  if(canals.includes('suez') && either(['INDIAN','ASIA'])){
+    if(!warZones.includes('redsea')) warZones.push('redsea');
+  }
+  if(rA==='BLACK SEA'||rB==='BLACK SEA') warZones.push('blacksea');
+
+  return {nm, canals, warZones, routeDesc};
 }
 
 // ══════════════════════════════════════════════════
