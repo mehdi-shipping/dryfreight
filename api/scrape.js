@@ -7,6 +7,10 @@
 // Also callable manually for testing.
 // ══════════════════════════════════════════════════
 
+// Node 18+ has native fetch. This line is a safety
+// fallback for older environments.
+const fetch = globalThis.fetch || require('node-fetch');
+
 const SUPABASE_URL    = process.env.SUPABASE_URL;
 const SUPABASE_KEY    = process.env.SUPABASE_SERVICE_KEY; // service role key (write access)
 const CRON_SECRET     = process.env.CRON_SECRET;          // protects this endpoint
@@ -302,16 +306,20 @@ async function scrape() {
 }
 
 // ── Vercel handler ─────────────────────────────────
-export default async function handler(req, res) {
-  // Allow GET from cron (Vercel sends Authorization header automatically)
-  // Also allow manual POST with secret for testing
+module.exports = async function handler(req, res) {
+  // Parse secret from URL manually (req.query can be unreliable)
+  const urlSecret = new URL(req.url, 'https://x.com').searchParams.get('secret');
   const auth = req.headers.authorization || '';
   const isVercelCron = req.headers['x-vercel-cron'] === '1';
   const isManual     = CRON_SECRET && auth === `Bearer ${CRON_SECRET}`;
-  const isQuery      = CRON_SECRET && req.query.secret === CRON_SECRET;
+  const isQuery      = CRON_SECRET && urlSecret === CRON_SECRET;
 
   if (!isVercelCron && !isManual && !isQuery) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({
+      error: 'Unauthorized',
+      debug_secret_received: urlSecret || '(none)',
+      debug_cron_secret_set: !!CRON_SECRET,
+    });
   }
 
   try {
