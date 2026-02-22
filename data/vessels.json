@@ -1,0 +1,81 @@
+{
+  "specs": {
+    "HANDY": {
+      "ladenKn": 13.0,
+      "ballKn": 13.5,
+      "ladenCons": 24,
+      "ballCons": 21,
+      "portCons": 3
+    },
+    "SUPRAMAX": {
+      "ladenKn": 13.5,
+      "ballKn": 14.0,
+      "ladenCons": 28,
+      "ballCons": 25,
+      "portCons": 3
+    },
+    "ULTRAMAX": {
+      "ladenKn": 13.5,
+      "ballKn": 14.0,
+      "ladenCons": 30,
+      "ballCons": 27,
+      "portCons": 3
+    },
+    "PANAMAX": {
+      "ladenKn": 13.5,
+      "ballKn": 14.0,
+      "ladenCons": 32,
+      "ballCons": 29,
+      "portCons": 4
+    },
+    "CAPESIZE": {
+      "ladenKn": 14.0,
+      "ballKn": 14.5,
+      "ladenCons": 52,
+      "ballCons": 46,
+      "portCons": 5
+    }
+  },
+  "ranges": [
+    {
+      "v": "HANDY",
+      "label": "Handysize",
+      "min": 5000,
+      "max": 39999,
+      "dwt": 32000,
+      "desc": "~32,000 DWT \u00b7 5k\u201340k MT"
+    },
+    {
+      "v": "SUPRAMAX",
+      "label": "Supramax",
+      "min": 40000,
+      "max": 54999,
+      "dwt": 52000,
+      "desc": "~52,000 DWT \u00b7 40k\u201355k MT"
+    },
+    {
+      "v": "ULTRAMAX",
+      "label": "Ultramax",
+      "min": 55000,
+      "max": 64999,
+      "dwt": 61000,
+      "desc": "~61,000 DWT \u00b7 55k\u201365k MT"
+    },
+    {
+      "v": "PANAMAX",
+      "label": "Panamax",
+      "min": 65000,
+      "max": 84999,
+      "dwt": 76000,
+      "desc": "~76,000 DWT \u00b7 65k\u201385k MT"
+    },
+    {
+      "v": "CAPESIZE",
+      "label": "Capesize",
+      "min": 85000,
+      "max": 200000,
+      "dwt": 175000,
+      "desc": "~175,000 DWT \u00b7 85k\u2013200k MT"
+    }
+  ]
+}

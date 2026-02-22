@@ -1,0 +1,94 @@
+{
+  "da": {
+    "N.EUROPE": 65000,
+    "BALTIC": 50000,
+    "W.MED": 44000,
+    "E.MED": 39000,
+    "BLACK SEA": 34000,
+    "US GULF": 58000,
+    "US EAST COAST": 54000,
+    "E.S.AMERICA": 41000,
+    "N.S.AMERICA": 37000,
+    "W.AFRICA": 44000,
+    "S.AFRICA": 41000,
+    "E.AFRICA": 34000,
+    "RED SEA": 34000,
+    "MIDDLE EAST": 37000,
+    "W.INDIA": 31000,
+    "E.INDIA": 27000,
+    "SE.ASIA": 31000,
+    "CHINA": 37000,
+    "N.ASIA": 43000,
+    "AUSTRALIA": 43000,
+    "E.N.AMERICA": 52000,
+    "CARIBBEAN": 34000,
+    "MEXICO": 36000,
+    "W.S.AMERICA": 33000,
+    "S.INDIA": 29000
+  },
+  "portRate": {
+    "N.EUROPE": 8000,
+    "BALTIC": 7000,
+    "W.MED": 7000,
+    "E.MED": 6500,
+    "BLACK SEA": 6000,
+    "US GULF": 9000,
+    "US EAST COAST": 8500,
+    "E.S.AMERICA": 5500,
+    "N.S.AMERICA": 5000,
+    "W.AFRICA": 4500,
+    "S.AFRICA": 5000,
+    "E.AFRICA": 4000,
+    "RED SEA": 5000,
+    "MIDDLE EAST": 5500,
+    "W.INDIA": 5000,
+    "E.INDIA": 5000,
+    "SE.ASIA": 6500,
+    "CHINA": 8000,
+    "N.ASIA": 7500,
+    "AUSTRALIA": 7000,
+    "E.N.AMERICA": 7500,
+    "CARIBBEAN": 5000,
+    "MEXICO": 5500,
+    "W.S.AMERICA": 5000,
+    "S.INDIA": 4500
+  },
+  "ecaRegions": [
+    "N.EUROPE",
+    "BALTIC",
+    "US GULF",
+    "US EAST COAST"
+  ],
+  "war": {
+    "redsea": {
+      "label": "Red Sea / Houthi",
+      "hull": 175000,
+      "cargoPerMt": 0.2
+    },
+    "blacksea": {
+      "label": "Black Sea / Ukraine",
+      "hull": 115000,
+      "cargoPerMt": 0.15
+    }
+  },
+  "tolls": {
+    "suez": {
+      "HANDY": 155000,
+      "SUPRAMAX": 230000,
+      "ULTRAMAX": 270000,
+      "PANAMAX": 325000,
+      "CAPESIZE": 420000
+    },
+    "panama": {
+      "HANDY": 130000,
+      "SUPRAMAX": 185000,
+      "ULTRAMAX": 215000,
+      "PANAMAX": 270000,
+      "CAPESIZE": 0
+    }
+  },
+  "defaultBunkerPrices": {
+    "vlsfo": 615,
+    "mgo": 870
+  }
+}
