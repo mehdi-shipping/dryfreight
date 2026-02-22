@@ -515,6 +515,10 @@ let WAR          = {};
 let TOLLS        = {};
 let DEFAULT_BUNKER_PRICES = {vlsfo: 615, mgo: 870};
 
+// Live rates from API — populated after loadData()
+// Each entry: {vesselType, originRegion, destinationRegion, rate, confidence, tier, daysOld, scrapedDate, rawLine}
+let LIVE_RATES = [];
+
 // ══════════════════════════════════════════════════
 // VESSEL HELPERS
 // These use the globals populated by loadData()
@@ -524,16 +528,89 @@ function vesselForCargo(mt){
   return VESSEL_RANGES[VESSEL_RANGES.length-1];
 }
 
-function matchTC(oR, dR, vt){
+// ── Region neighbours for fuzzy matching ───────────
+// Used by both live and fixture matching
+function regionNeighbours(r){ return RN[r] || []; }
+
+// ── Score how well two regions match ───────────────
+function regionScore(a, b){
+  if(a===b) return 40;
+  if(regionNeighbours(a).includes(b)) return 20;
+  if(regionNeighbours(b).includes(a)) return 12;
+  return 0;
+}
+
+// ── Match against LIVE_RATES (scraped from HandyBulk) ──
+// Returns best live match with its confidence score,
+// or null if nothing useful found.
+function matchLive(oR, dR, vt){
+  let best = null, bestScore = 0;
+  for(const r of LIVE_RATES){
+    let s = 0;
+    s += regionScore(r.originRegion, oR);
+    s += regionScore(r.destinationRegion, dR);
+    // Vessel type
+    if(r.vesselType === vt) s += 20;
+    else s += 3; // slight credit for any live rate
+    if(s > bestScore){ bestScore = s; best = r; }
+  }
+  if(!best || bestScore < 15) return null; // not confident enough
+
+  // Adjust confidence downward for non-exact matches
+  let conf = best.confidence;
+  if(best.originRegion !== oR || best.destinationRegion !== dR) conf = Math.round(conf * 0.75);
+  if(best.vesselType   !== vt)                                  conf = Math.round(conf * 0.85);
+  conf = Math.max(conf, 15);
+
+  return {
+    rate:        best.rate,
+    confidence:  conf,
+    tier:        best.tier,
+    daysOld:     best.daysOld,
+    scrapedDate: best.scrapedDate,
+    rawLine:     best.rawLine,
+    source:      'live',
+    matchNote:   best.vesselType+' '+best.originRegion+' → '+best.destinationRegion
+                 +' ('+best.daysOld+'d old)',
+  };
+}
+
+// ── Match against hardcoded FIXTURES (fallback) ────
+function matchFixture(oR, dR, vt){
   let best=null, bsc=0, bestF=null;
   for(const f of FIXTURES){
     let s=0;
-    if(f.oR===oR)s+=40; else if((RN[f.oR]||[]).includes(oR))s+=20; else if((RN[oR]||[]).includes(f.oR))s+=12;
-    if(f.dR===dR)s+=40; else if((RN[f.dR]||[]).includes(dR))s+=20; else if((RN[dR]||[]).includes(f.dR))s+=12;
-    if(f.vt===vt)s+=20; else s+=5;
-    if(s>bsc){bsc=s;best=f.rate;bestF=f;}
+    s += regionScore(f.oR, oR);
+    s += regionScore(f.dR, dR);
+    if(f.vt===vt) s+=20; else s+=5;
+    if(s>bsc){bsc=s; best=f.rate; bestF=f;}
   }
-  return {rate: best||15000, fixture: bestF};
+  return {
+    rate:       best||15000,
+    confidence: 30,
+    tier:       4,
+    daysOld:    null,
+    scrapedDate:null,
+    source:     'fixture',
+    matchNote:  bestF ? bestF.vt+' '+bestF.oR+' → '+bestF.dR+' (hardcoded)' : 'default fallback',
+  };
+}
+
+// ── Main TC rate lookup ─────────────────────────────
+// Tries live rates first, falls back to fixtures.
+function matchTC(oR, dR, vt){
+  const live    = matchLive(oR, dR, vt);
+  const fixture = matchFixture(oR, dR, vt);
+  const result  = live || fixture;
+  return {
+    rate:       result.rate,
+    confidence: result.confidence,
+    tier:       result.tier,
+    daysOld:    result.daysOld,
+    scrapedDate:result.scrapedDate,
+    source:     result.source,
+    matchNote:  result.matchNote,
+  };
 }
 
 // ══════════════════════════════════════════════════
@@ -543,11 +620,14 @@ function matchTC(oR, dR, vt){
 // ══════════════════════════════════════════════════
 async function loadData(){
   try {
-    const [portsData, vesselsData, fixturesData, regionsData] = await Promise.all([
+    // Load static JSON files and live API rates in parallel.
+    // Live rates failure is non-fatal — we fall back to fixtures.
+    const [portsData, vesselsData, fixturesData, regionsData, liveData] = await Promise.all([
       fetch('./data/ports.json').then(r => r.json()),
       fetch('./data/vessels.json').then(r => r.json()),
       fetch('./data/fixtures.json').then(r => r.json()),
       fetch('./data/regions.json').then(r => r.json()),
+      fetch('/api/rates').then(r => r.json()).catch(() => null),
     ]);
 
     // Populate globals
@@ -562,6 +642,14 @@ async function loadData(){
     WAR           = regionsData.war;
     TOLLS         = regionsData.tolls;
     DEFAULT_BUNKER_PRICES = regionsData.defaultBunkerPrices;
+
+    // Live rates — use if available
+    if(liveData && liveData.success && liveData.rates && liveData.rates.length > 0){
+      LIVE_RATES = liveData.rates;
+      console.log(`[DryFreight] Live rates loaded: ${LIVE_RATES.length} routes`);
+    } else {
+      console.log('[DryFreight] Live rates unavailable — using hardcoded fixtures');
+    }
 
     // Hide loading banner, show app
     document.getElementById('loading-banner').style.display = 'none';
@@ -728,13 +816,15 @@ function routedDistance(pA,pB){
 function compute(lp,dp,cargoMt){
   const vr=vesselForCargo(cargoMt);
   const sp=VESSEL_SPECS[vr.v];
-  const {rate:tcRate,fixture}=matchTC(lp.region,dp.region,vr.v);
+  const tcMatch=matchTC(lp.region,dp.region,vr.v);
   const {nm,canals,warZones,routeDesc}=routedDistance(lp,dp);
   const canalCosts={};
   for(const c of canals) canalCosts[c]=(TOLLS[c]||{})[vr.v]||0;
   const warCosts={};
   for(const z of warZones) warCosts[z]=Math.round((WAR[z].hull)+(cargoMt*WAR[z].cargoPerMt));
-  return {vr,sp,tcRate,fixture,nm,canals,warZones,canalCosts,warCosts,routeDesc,
+  return {vr,sp,
+          tcRate:tcMatch.rate, tcMatch,
+          nm,canals,warZones,canalCosts,warCosts,routeDesc,
           daLoad:DA[lp.region]||40000,daDisch:DA[dp.region]||40000,
           lRate:PORT_RATE[lp.region]||6000,dRate:PORT_RATE[dp.region]||6000};
 }
@@ -858,7 +948,7 @@ function doCalc(){
     routeDesc: C.routeDesc,
     canals: C.canals,
     warZones: C.warZones,
-    fixture: C.fixture,
+    tcMatch: C.tcMatch,
     tcRate: C.tcRate,
     ladenKn: C.sp.ladenKn,
     ballKn: C.sp.ballKn,
@@ -901,11 +991,33 @@ function doCalc(){
   document.getElementById('o-daloadnote').textContent=portSel.load.name+' ('+portSel.load.region+')';
   document.getElementById('o-dadischnote').textContent=portSel.disch.name+' ('+portSel.disch.region+')';
 
-  // TC fixture note
-  if(C.fixture){
-    document.getElementById('o-tcnote').textContent=
-      'Nearest fixture: '+C.fixture.vt+' '+C.fixture.oR+' → '+C.fixture.dR;
-  }
+  // TC rate source + confidence note
+  (function(){
+    const m = C.tcMatch;
+    const noteEl = document.getElementById('o-tcnote');
+    if(!noteEl) return;
+
+    // Confidence colour
+    const col = m.confidence >= 80 ? '#90d060'   // green  — Tier 1 live
+              : m.confidence >= 60 ? '#f5c842'   // yellow — Tier 2 live
+              : m.confidence >= 40 ? '#e07820'   // orange — Tier 3 / near match
+              :                      '#666';     // grey   — fixture fallback
+
+    let label = '';
+    if(m.source === 'live'){
+      const d = m.daysOld === 0 ? 'today'
+              : m.daysOld === 1 ? '1 day ago'
+              : m.daysOld + ' days ago';
+      label = `Market rate scraped ${d}`;
+    } else {
+      label = 'Hardcoded reference rate';
+    }
+
+    noteEl.innerHTML =
+      `<span style="color:${col};font-weight:700">${m.confidence}/100</span>`
+      + `&nbsp;&nbsp;${label}`
+      + `<br><span style="color:#444;font-size:10px">${m.matchNote}</span>`;
+  })();
 
   // Populate editable inputs
   setInput('p-tcrate',    C.tcRate);
