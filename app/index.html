@@ -628,6 +628,7 @@ function populateCommoditySelect(){
 }
 
 
+function vesselForCargo(mt){
   for(const v of VESSEL_RANGES) if(mt>=v.min && mt<=v.max) return v;
   return VESSEL_RANGES[VESSEL_RANGES.length-1];
 }
