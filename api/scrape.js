@@ -26,13 +26,17 @@ const REGION_MAP = {
   'n.europe':               'N.EUROPE',
   'north europe':           'N.EUROPE',
   'northern europe':        'N.EUROPE',
-  'arag':                   'N.EUROPE',   // Amsterdam-Rotterdam-Antwerp-Ghent
+  'arag':                   'N.EUROPE',
   'uk continent':           'N.EUROPE',
   'germany':                'N.EUROPE',
   'uk':                     'N.EUROPE',
   'netherlands':            'N.EUROPE',
   'belgium':                'N.EUROPE',
   'france':                 'N.EUROPE',
+  'baltic':                 'BALTIC',
+  'finland':                'BALTIC',
+  'sweden':                 'BALTIC',
+  'poland':                 'BALTIC',
   // Mediterranean
   'spain':                  'W.MED',
   'portugal':               'W.MED',
@@ -66,11 +70,14 @@ const REGION_MAP = {
   'brazil':                 'E.S.AMERICA',
   'argentina':              'E.S.AMERICA',
   'uruguay':                'E.S.AMERICA',
-  'sw passage':             'E.S.AMERICA',  // SW Passage = S. America
+  'sw passage':             'E.S.AMERICA',
   'north coast south america':'N.S.AMERICA',
   'ncsa':                   'N.S.AMERICA',
   'colombia':               'N.S.AMERICA',
+  'colombia east coast':    'N.S.AMERICA',
   'venezuela':              'N.S.AMERICA',
+  'east coast north america':'US EAST COAST',
+  'ecna':                   'US EAST COAST',
   'dominican republic':     'CARIBBEAN',
   'caribbean':              'CARIBBEAN',
   'mexico east coast':      'MEXICO',
@@ -177,8 +184,11 @@ function mapVessel(text) {
 // Also handles "via" routes:
 //   "Supramax open West Africa (WAFR) via ECSA to China fixed around $20,500"
 function parseLine(line) {
-  // Strip bullet, trim
-  const clean = line.replace(/^[•·\-\*]\s*/, '').trim();
+  // Strip HTML tags, bullet chars, trim
+  const clean = line
+    .replace(/<[^>]+>/g, '')     // remove ALL HTML tags e.g. <p>, </p>
+    .replace(/^[•·\-\*]\s*/, '') // remove bullet
+    .trim();
 
   // Must end with "fixed around $NUMBER"
   const rateMatch = clean.match(/fixed\s+around\s+\$([0-9,]+)/i);
