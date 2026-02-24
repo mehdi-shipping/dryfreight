@@ -359,7 +359,7 @@ header{border-bottom:1px solid #1e1e2a;padding-bottom:16px;margin-bottom:28px;di
               <input id="p-vlsfopx" class="p-in" type="number" step="5" oninput="onParamChange()">
               <span class="p-unit">$/MT</span>
             </div>
-            <span class="param-note">Very Low Sulphur Fuel Oil (main fuel)</span>
+            <span class="param-note" id="o-vlsfonote">Ship &amp; Bunker</span>
           </div>
           <div class="param-row">
             <span class="param-lbl">MGO price</span>
@@ -367,7 +367,7 @@ header{border-bottom:1px solid #1e1e2a;padding-bottom:16px;margin-bottom:28px;di
               <input id="p-mgopx" class="p-in" type="number" step="5" oninput="onParamChange()">
               <span class="p-unit">$/MT</span>
             </div>
-            <span class="param-note">Marine Gas Oil (ECA zones &amp; port)</span>
+            <span class="param-note" id="o-mgonote">Ship &amp; Bunker</span>
           </div>
         </div>
 
@@ -554,6 +554,10 @@ let DEFAULT_BUNKER_PRICES = {vlsfo: 615, mgo: 870};
 // Live rates from API — populated after loadData()
 // Each entry: {vesselType, originRegion, destinationRegion, rate, confidence, tier, daysOld, scrapedDate, rawLine}
 let LIVE_RATES = [];
+
+// Bunker prices by hub — populated after loadData()
+// { Singapore: {vlsfo, mgo, scrapedDate, daysOld}, Rotterdam: {...}, ... }
+let BUNKER_PRICES = {};
 
 // Commodity data — populated by loadData()
 let COMMODITIES       = {};   // commodity definitions
@@ -782,6 +786,14 @@ async function loadData(){
       console.log(`[DryFreight] Live rates loaded: ${LIVE_RATES.length} routes`);
     } else {
       console.log('[DryFreight] Live rates unavailable — using hardcoded fixtures');
+    }
+
+    // Bunker prices — non-fatal if missing
+    if(liveData && liveData.bunker && Object.keys(liveData.bunker).length > 0){
+      BUNKER_PRICES = liveData.bunker;
+      console.log(`[DryFreight] Bunker prices loaded: ${Object.keys(BUNKER_PRICES).join(', ')}`);
+    } else {
+      console.log('[DryFreight] Bunker prices unavailable — using fallback values');
     }
 
     // Hide loading banner, show app
@@ -1067,6 +1079,61 @@ function getSelectedRoute(lp, dp){
 }
 
 
+// ══════════════════════════════════════════════════
+// BUNKER HUB ASSIGNMENT
+// Returns the most relevant bunkering hub for a
+// given route, and the live prices for that hub.
+// ══════════════════════════════════════════════════
+// Simple rules (in priority order):
+//  1. Via Suez → Fujairah (everyone bunkers there)
+//  2. Via Panama → Houston (Gulf is the natural stop)
+//  3. Both zones Asia/Pacific → Singapore
+//  4. Either zone Asia → Singapore
+//  5. Either zone Indian Ocean (India/ME) → Fujairah
+//  6. Either zone Americas → Houston
+//  7. Default (Europe/Med/Africa) → Rotterdam
+function getBunkerHub(zA, zB, canals){
+  if(canals && canals.includes('suez'))   return 'Fujairah';
+  if(canals && canals.includes('panama')) return 'Houston';
+  if(zA==='ASIA' && zB==='ASIA')          return 'Singapore';
+  if(zA==='ASIA' || zB==='ASIA')          return 'Singapore';
+  if(zA==='INDIAN' || zB==='INDIAN')      return 'Fujairah';
+  if(['ATL_AMER','PAC_AMER'].includes(zA)||['ATL_AMER','PAC_AMER'].includes(zB)) return 'Houston';
+  return 'Rotterdam';
+}
+
+// Get live price for a hub, with fallback hardcoded values
+// Fallbacks are conservative estimates if scraping fails
+const BUNKER_FALLBACKS = {
+  Singapore: { vlsfo: 510, mgo: 720 },
+  Rotterdam:  { vlsfo: 475, mgo: 715 },
+  Houston:    { vlsfo: 490, mgo: 700 },
+  Fujairah:   { vlsfo: 510, mgo: 780 },
+};
+
+function getBunkerPrices(hub){
+  const live = BUNKER_PRICES[hub];
+  if(live && live.vlsfo && live.mgo){
+    return {
+      vlsfo:       live.vlsfo,
+      mgo:         live.mgo,
+      hub,
+      scrapedDate: live.scrapedDate,
+      daysOld:     live.daysOld,
+      source:      'live',
+    };
+  }
+  // Fallback to hardcoded
+  const fb = BUNKER_FALLBACKS[hub] || BUNKER_FALLBACKS['Singapore'];
+  return {
+    vlsfo:   fb.vlsfo,
+    mgo:     fb.mgo,
+    hub,
+    source:  'fallback',
+  };
+}
+
+
 function compute(lp, dp, cargoMt, routeOpt){
   const vr = vesselForCargo(cargoMt);
   const sp = VESSEL_SPECS[vr.v];
@@ -1092,6 +1159,11 @@ function compute(lp, dp, cargoMt, routeOpt){
   // Ballast factor based on discharge region (where vessel repositions from)
   const ballastFactor = getBallastFactor(dp.region);
 
+  // Bunker hub and live prices for this route
+  const zA = routeZone(lp), zB = routeZone(dp);
+  const bunkerHub    = getBunkerHub(zA, zB, canals);
+  const bunkerPrices = getBunkerPrices(bunkerHub);
+
   return {vr, sp,
           tcRate: tcMatch.rate, tcMatch,
           nm, canals, warZones, canalCosts, warCosts, routeDesc,
@@ -1099,6 +1171,7 @@ function compute(lp, dp, cargoMt, routeOpt){
           lRate: loadRates.load,   lRateDisch: loadRates.disch,
           dRate: dischRates.disch, dRateLoad:  dischRates.load,
           ballastFactor,
+          bunkerHub, bunkerPrices,
           daLoad: DA[lp.region]||40000, daDisch: DA[dp.region]||40000};
 }
 
@@ -1234,8 +1307,8 @@ function doCalc(){
     ballFactor: C.ballastFactor,
     lRate: C.lRate,
     dRate: C.dRate,
-    vlsfoPrice: 615,
-    mgoPrice: 870,
+    vlsfoPrice: C.bunkerPrices.vlsfo,
+    mgoPrice:   C.bunkerPrices.mgo,
     ladenCons: C.sp.ladenCons,
     ballCons: C.sp.ballCons,
     portCons: C.sp.portCons,
@@ -1303,8 +1376,18 @@ function doCalc(){
   setInput('p-ball',      C.ballastFactor);
   setInput('p-lrate',     C.lRate);
   setInput('p-drate',     C.dRate);
-  setInput('p-vlsfopx',   615);
-  setInput('p-mgopx',     870);
+  setInput('p-vlsfopx',   C.bunkerPrices.vlsfo);
+  setInput('p-mgopx',     C.bunkerPrices.mgo);
+
+  // Show bunker hub and freshness
+  const bp = C.bunkerPrices;
+  const hubNote = bp.source === 'live'
+    ? `${bp.hub} · ${bp.daysOld === 0 ? 'today' : bp.daysOld + 'd ago'} · Ship & Bunker`
+    : `${bp.hub} · estimated`;
+  const vlsfoNoteEl = document.getElementById('o-vlsfonote');
+  const mgoNoteEl   = document.getElementById('o-mgonote');
+  if(vlsfoNoteEl) vlsfoNoteEl.textContent = 'VLSFO · ' + hubNote;
+  if(mgoNoteEl)   mgoNoteEl.textContent   = 'MGO · '   + hubNote;
   setInput('p-ladencons', C.sp.ladenCons);
   setInput('p-ballcons',  C.sp.ballCons);
   setInput('p-portcons',  C.sp.portCons);

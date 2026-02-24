@@ -273,40 +273,148 @@ async function insertToSupabase(rows) {
   }
 }
 
-// ── Main scrape function ───────────────────────────
-async function scrape() {
-  // 1. Fetch HandyBulk
-  const res = await fetch(SOURCE_URL, {
+// ── Insert bunker prices into Supabase ─────────────
+async function insertBunkerPrices(rows) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/bunker_prices`, {
+    method: 'POST',
+    headers: {
+      'apikey':        SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type':  'application/json',
+      'Prefer':        'return=minimal',
+    },
+    body: JSON.stringify(rows),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Bunker insert failed: ${res.status} ${err}`);
+  }
+}
+
+// ── Fetch and parse Ship & Bunker prices ───────────
+// The page renders VLSFO first, MGO second.
+// We look for table rows matching our 4 key hubs.
+const BUNKER_HUBS = ['Singapore', 'Rotterdam', 'Houston', 'Fujairah'];
+const BUNKER_SOURCE = 'https://shipandbunker.com/prices';
+
+async function scrapeBunkerPrices() {
+  const res = await fetch(BUNKER_SOURCE, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       'Accept-Language': 'en-US,en;q=0.5',
     },
   });
-  if (!res.ok) throw new Error(`Failed to fetch HandyBulk: ${res.status}`);
+  if (!res.ok) throw new Error(`Failed to fetch Ship & Bunker: ${res.status}`);
   const html = await res.text();
 
-  // 2. Parse rates
-  const parsed = parseRates(html);
-  if (parsed.length === 0) throw new Error('No rates found — page structure may have changed');
+  // The page has two identical-structured tables — VLSFO then MGO.
+  // Each table row looks like:
+  //   <td ...>Singapore</td><td ...>516.00</td>...
+  // Strategy: find all table rows containing our hub names + a price,
+  // split into VLSFO/MGO by which table they appear in.
 
-  // 3. Add today's date
+  // Extract all <table> blocks
+  const tableMatches = [...html.matchAll(/<table[\s\S]*?<\/table>/gi)];
+  
+  const hubPrices = {}; // { hub: { vlsfo, mgo } }
+
+  let vlsfoTable = null, mgoTable = null;
+
+  // Find the two price tables — they contain 'Global 20 Ports Average'
+  for (const m of tableMatches) {
+    const t = m[0];
+    if (t.includes('Global 20 Ports Average') || t.includes('Singapore')) {
+      if (!vlsfoTable) { vlsfoTable = t; }
+      else if (!mgoTable) { mgoTable = t; break; }
+    }
+  }
+
+  // Parse a table for hub prices
+  function parseTable(tableHtml) {
+    const result = {};
+    if (!tableHtml) return result;
+    // Match rows: look for hub name followed by price
+    for (const hub of BUNKER_HUBS) {
+      // Pattern: hub name in a cell, followed by price in next cell
+      const re = new RegExp(hub + '[\\s\\S]{0,200}?>(\\d{3,4}\\.\\d{2})<', 'i');
+      const m = tableHtml.match(re);
+      if (m) result[hub] = parseFloat(m[1]);
+    }
+    return result;
+  }
+
+  const vlsfoPrices = parseTable(vlsfoTable);
+  const mgoPrices   = parseTable(mgoTable);
+
+  for (const hub of BUNKER_HUBS) {
+    if (vlsfoPrices[hub] || mgoPrices[hub]) {
+      hubPrices[hub] = {
+        vlsfo: vlsfoPrices[hub] || null,
+        mgo:   mgoPrices[hub]   || null,
+      };
+    }
+  }
+
+  return hubPrices;
+}
+
+// ── Main scrape function ───────────────────────────
+async function scrape() {
   const today = new Date().toISOString().split('T')[0];
-  const rows  = parsed.map(r => ({
-    scraped_date:        today,
-    vessel_type:         r.vesselType,
-    origin_text:         r.originText,
-    destination_text:    r.destinationText,
-    origin_region:       r.originRegion,
-    destination_region:  r.destinationRegion,
-    rate:                r.rate,
-    raw_line:            r.rawLine,
-  }));
 
-  // 4. Insert to Supabase
-  await insertToSupabase(rows);
+  // Run HandyBulk and Ship & Bunker in parallel
+  const [hbResult, bunkerPrices] = await Promise.allSettled([
+    // HandyBulk TC rates
+    (async () => {
+      const res = await fetch(SOURCE_URL, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+        },
+      });
+      if (!res.ok) throw new Error(`Failed to fetch HandyBulk: ${res.status}`);
+      const html = await res.text();
+      const parsed = parseRates(html);
+      if (parsed.length === 0) throw new Error('No rates found — page structure may have changed');
+      const rows = parsed.map(r => ({
+        scraped_date:        today,
+        vessel_type:         r.vesselType,
+        origin_text:         r.originText,
+        destination_text:    r.destinationText,
+        origin_region:       r.originRegion,
+        destination_region:  r.destinationRegion,
+        rate:                r.rate,
+        raw_line:            r.rawLine,
+      }));
+      await insertToSupabase(rows);
+      return { inserted: rows.length };
+    })(),
 
-  return { date: today, inserted: rows.length, rates: rows };
+    // Ship & Bunker bunker prices
+    (async () => {
+      const prices = await scrapeBunkerPrices();
+      const rows = Object.entries(prices).map(([hub, p]) => ({
+        scraped_date: today,
+        hub,
+        vlsfo: p.vlsfo,
+        mgo:   p.mgo,
+      }));
+      if (rows.length > 0) await insertBunkerPrices(rows);
+      return { hubs: rows.length, prices };
+    })(),
+  ]);
+
+  const tcResult     = hbResult.status     === 'fulfilled' ? hbResult.value     : { error: hbResult.reason?.message };
+  const bunkerResult = bunkerPrices.status === 'fulfilled' ? bunkerPrices.value : { error: bunkerPrices.reason?.message };
+
+  return {
+    date:   today,
+    tc:     tcResult,
+    bunker: bunkerResult,
+  };
 }
 
 // ── Vercel handler ─────────────────────────────────
@@ -328,10 +436,11 @@ module.exports = async function handler(req, res) {
 
   try {
     const result = await scrape();
-    console.log(`[scrape] ${result.date}: inserted ${result.inserted} rates`);
+    console.log(`[scrape] ${result.date}: TC=${JSON.stringify(result.tc)} bunker=${JSON.stringify(result.bunker)}`);
     res.json({ success: true, ...result });
   } catch (err) {
     console.error('[scrape] error:', err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 }
+

@@ -24,7 +24,7 @@ function getTierAndConfidence(daysOld) {
   return { tier: 4, confidence: 30 };
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS — allow the calculator to call this from any origin
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -34,46 +34,56 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    // Fetch all rows from last 45 days
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - TIER3_DAYS);
     const cutoffStr = cutoff.toISOString().split('T')[0];
     const today     = new Date().toISOString().split('T')[0];
 
-    const params = new URLSearchParams({
-      select:       'vessel_type,origin_region,destination_region,origin_text,destination_text,rate,scraped_date,raw_line',
-      scraped_date: `gte.${cutoffStr}`,
-      order:        'scraped_date.desc',
-      limit:        '5000',
-    });
+    // Fetch TC rates and bunker prices in parallel
+    const [tcRes, bunkerRes] = await Promise.all([
+      // TC rates — last 45 days
+      fetch(`${SUPABASE_URL}/rest/v1/scraped_rates?select=vessel_type,origin_region,destination_region,origin_text,destination_text,rate,scraped_date,raw_line&scraped_date=gte.${cutoffStr}&order=scraped_date.desc&limit=5000`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      }),
+      // Bunker prices — last 7 days per hub
+      fetch(`${SUPABASE_URL}/rest/v1/bunker_prices?select=hub,vlsfo,mgo,scraped_date&order=scraped_date.desc&limit=50`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      }),
+    ]);
 
-    const supaRes = await fetch(`${SUPABASE_URL}/rest/v1/scraped_rates?${params}`, {
-      headers: {
-        'apikey':        SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-      },
-    });
+    if (!tcRes.ok) throw new Error(`Supabase TC query failed: ${tcRes.status}`);
+    const rows = await tcRes.json();
 
-    if (!supaRes.ok) {
-      const err = await supaRes.text();
-      throw new Error(`Supabase query failed: ${supaRes.status} ${err}`);
-    }
-
-    const rows = await supaRes.json();
-
-    // Dedup: for each (vessel, origin, destination) keep only the most recent row
-    // (rows are already ordered by scraped_date DESC so first seen = most recent)
-    const best = new Map();
-    for (const row of rows) {
-      const key = `${row.vessel_type}|${row.origin_region}|${row.destination_region}`;
-      if (!best.has(key)) {
-        best.set(key, row);
+    // Bunker prices — non-fatal
+    let bunkerByHub = {};
+    if (bunkerRes.ok) {
+      const bunkerRows = await bunkerRes.json();
+      // Keep only the most recent row per hub
+      for (const row of bunkerRows) {
+        if (!bunkerByHub[row.hub]) {
+          const rowMs   = new Date(row.scraped_date).getTime();
+          const todayMs = new Date(today).getTime();
+          const daysOld = Math.round((todayMs - rowMs) / 86400000);
+          bunkerByHub[row.hub] = {
+            hub:         row.hub,
+            vlsfo:       row.vlsfo,
+            mgo:         row.mgo,
+            scrapedDate: row.scraped_date,
+            daysOld,
+          };
+        }
       }
     }
 
-    // Build response with freshness metadata
-    const todayMs   = new Date(today).getTime();
-    const result    = [];
+    // Dedup TC rates: keep most recent per (vessel, origin, destination)
+    const best = new Map();
+    for (const row of rows) {
+      const key = `${row.vessel_type}|${row.origin_region}|${row.destination_region}`;
+      if (!best.has(key)) best.set(key, row);
+    }
+
+    const todayMs = new Date(today).getTime();
+    const result  = [];
 
     for (const row of best.values()) {
       const rowMs   = new Date(row.scraped_date).getTime();
@@ -95,21 +105,21 @@ export default async function handler(req, res) {
       });
     }
 
-    // Sort by vessel then origin for easier debugging
     result.sort((a, b) =>
       a.vesselType.localeCompare(b.vesselType) ||
       a.originRegion.localeCompare(b.originRegion)
     );
 
     res.json({
-      success:     true,
-      count:       result.length,
-      fetchedAt:   new Date().toISOString(),
-      rates:       result,
+      success:   true,
+      count:     result.length,
+      fetchedAt: new Date().toISOString(),
+      rates:     result,
+      bunker:    bunkerByHub,
     });
 
   } catch (err) {
     console.error('[rates] error:', err.message);
-    res.status(500).json({ success: false, error: err.message, rates: [] });
+    res.status(500).json({ success: false, error: err.message, rates: [], bunker: {} });
   }
 }
