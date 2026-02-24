@@ -233,18 +233,28 @@ function parseRates(html) {
   const rates = [];
   const seen  = new Set(); // dedup within one day's scrape
 
-  // Extract all bullet lines
-  const lines = html.split('\n');
+  // Split on newlines AND <br> tags — HandyBulk uses both
+  const lines = html.split(/\n|<br\s*\/?>/i);
+
   for (const line of lines) {
     const trimmed = line.trim();
-    if (!trimmed.startsWith('•') && !trimmed.startsWith('·')) continue;
+
+    // Must contain "fixed around $" — this is the only reliable signal
     if (!trimmed.toLowerCase().includes('fixed around')) continue;
+
+    // Must mention a vessel type
+    const tl = trimmed.toLowerCase();
+    if (!tl.includes('handy') && !tl.includes('supramax') &&
+        !tl.includes('ultramax') && !tl.includes('panamax') &&
+        !tl.includes('capesize') && !tl.includes('cape')) continue;
 
     const parsed = parseLine(trimmed);
     if (!parsed) continue;
 
-    // Dedup key: same vessel+origin+dest shouldn't appear twice in one day
-    const key = `${parsed.vesselType}|${parsed.originRegion}|${parsed.destinationRegion}`;
+    // Dedup on raw origin+destination text — preserves distinct routes
+    // that happen to map to the same region (e.g. Argentina→Morocco and
+    // Argentina→Algeria are both E.S.AMERICA→W.MED but different trades)
+    const key = `${parsed.vesselType}|${parsed.originText.toLowerCase()}|${parsed.destinationText.toLowerCase()}`;
     if (seen.has(key)) continue;
     seen.add(key);
 
