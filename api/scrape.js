@@ -429,7 +429,6 @@ async function scrape() {
 
 // ── Vercel handler ─────────────────────────────────
 module.exports = async function handler(req, res) {
-  // Parse secret from URL manually (req.query can be unreliable)
   const urlSecret = new URL(req.url, 'https://x.com').searchParams.get('secret');
   const auth = req.headers.authorization || '';
   const isVercelCron = req.headers['x-vercel-cron'] === '1';
@@ -437,11 +436,29 @@ module.exports = async function handler(req, res) {
   const isQuery      = CRON_SECRET && urlSecret === CRON_SECRET;
 
   if (!isVercelCron && !isManual && !isQuery) {
-    return res.status(401).json({
-      error: 'Unauthorized',
-      debug_secret_received: urlSecret || '(none)',
-      debug_cron_secret_set: !!CRON_SECRET,
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Debug mode: ?debug=1 — shows every line containing "fixed around"
+  // without inserting anything into the DB
+  const isDebug = new URL(req.url, 'https://x.com').searchParams.get('debug') === '1';
+  if (isDebug) {
+    const pageRes = await fetch(SOURCE_URL, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
     });
+    const html = await pageRes.text();
+    const lines = html.split(/\n|<br\s*\/?>/i);
+    const matched = lines
+      .map(l => l.trim())
+      .filter(l => l.toLowerCase().includes('fixed around'));
+    const parsed = matched.map(l => {
+      const p = parseLine(l);
+      return { raw: l, parsed: p || 'FAILED TO PARSE' };
+    });
+    return res.json({ total: matched.length, lines: parsed });
   }
 
   try {
