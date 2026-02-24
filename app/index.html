@@ -132,7 +132,157 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
 
 #results{margin-top:24px;display:none}
 
-@media(max-width:640px){.row2{grid-template-columns:1fr}.hero-bar{grid-template-columns:1fr 1fr}.param-row{grid-template-columns:140px 1fr}.param-note{display:none}}
+/* ── MOBILE ────────────────────────────────────────── */
+@media(max-width:640px){
+
+  /* Prevent iOS Safari zoom-on-focus page shift.
+     Any input < 16px triggers auto-zoom. Fix: force 16px on mobile. */
+  input, select, textarea {
+    font-size:16px !important;
+  }
+  .p-in{
+    font-size:16px !important;
+    width:110px;
+  }
+
+  /* Tighter page padding */
+  .wrap{padding:16px 12px 60px}
+
+  /* Header: stack logo and badge */
+  header{flex-wrap:wrap;gap:8px;padding-bottom:12px;margin-bottom:20px}
+  .logo-sub{display:none}
+
+  /* Freight tabs: horizontal scroll, don't wrap */
+  .freight-tabs{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:4px;
+    margin-bottom:16px;
+    gap:6px;
+    /* hide scrollbar visually */
+    scrollbar-width:none;
+  }
+  .freight-tabs::-webkit-scrollbar{display:none}
+  .freight-tab{
+    white-space:nowrap;
+    flex-shrink:0;
+    padding:7px 12px;
+    font-size:12px;
+  }
+
+  /* Form card */
+  .form-card{padding:16px;gap:16px}
+  .row2{grid-template-columns:1fr}
+
+  /* Port dropdown: fixed position on mobile to avoid clipping */
+  .dd{
+    position:fixed;
+    left:12px !important;
+    right:12px !important;
+    top:auto;
+    max-height:50vh;
+    z-index:1000;
+    box-shadow:0 8px 32px rgba(0,0,0,.15);
+  }
+
+  /* Hero bar: 3 equal columns, smaller text */
+  .hero-bar{
+    grid-template-columns:repeat(3,1fr);
+    padding:14px 12px;
+    gap:8px;
+  }
+  .hero-item .val{font-size:18px}
+  .hero-item .lbl{font-size:10px}
+
+  /* Section cards */
+  .sec-hdr{padding:12px 14px}
+  .sec-body{padding:12px 14px}
+
+  /* param-row: switch from 3-col grid to stacked layout.
+     Label on top, value below, note below value — ALL VISIBLE on mobile. */
+  .param-row{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:4px;
+    padding:8px 0;
+    border-bottom:1px solid #f5f2ee;
+  }
+  .param-row:last-child{border-bottom:none}
+  .param-lbl{
+    font-size:11px;
+    color:#aaa;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    font-weight:600;
+  }
+  .param-val-display{
+    font-size:14px;
+    color:#222;
+  }
+  /* Note: visible on mobile, shown below value */
+  .param-note{
+    display:block !important;
+    font-size:11px;
+    color:#bbb;
+    font-style:italic;
+    text-align:left;
+    line-height:1.4;
+  }
+  /* Input rows: make input full-width */
+  .p-inline{width:100%}
+  .p-in{
+    width:100% !important;
+    flex:1;
+    text-align:left;
+    padding:8px 10px;
+  }
+  .p-unit{font-size:12px;white-space:nowrap;flex-shrink:0}
+
+  /* Subtotal rows: keep them prominent */
+  .param-row.subtotal-row{
+    flex-direction:row;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:none;
+    border-top:1px solid #f0ece7;
+    margin-top:4px;
+  }
+  .param-row.subtotal-row .param-lbl{
+    font-size:13px;
+    color:#555;
+    font-weight:600;
+    text-transform:none;
+    letter-spacing:0;
+  }
+  .param-row.subtotal-row .param-val-display{
+    font-size:15px;
+    color:#e8384f;
+  }
+
+  /* param-block title spacing */
+  .param-block{margin-bottom:8px}
+  .param-block-title{margin-bottom:8px}
+
+  /* Route options */
+  .route-opt{padding:10px 12px}
+  .route-opt-nm{font-size:11px}
+
+  /* Grand total */
+  .grand-total{padding:14px 16px}
+  .gt-val{font-size:16px}
+  .gt-permt{font-size:13px}
+
+  /* Route badges: wrap nicely */
+  .route-badge{gap:6px}
+  .rbadge{font-size:10px;padding:3px 8px}
+
+  /* Calc button: big tap target */
+  .calc-btn{padding:16px;font-size:14px;border-radius:10px}
+}
+
 </style>
 </head>
 <body>
@@ -1511,12 +1661,23 @@ function filterPorts(wh,q){
   const ql=q.toLowerCase().trim();
   const list=ql?PORTS.filter(p=>p.name.toLowerCase().includes(ql)||p.country.toLowerCase().includes(ql)):PORTS;
   renderDD(wh,list.slice(0,80),ql);
+  positionDD(wh);
   document.getElementById(wh+'DD').classList.add('open');
 }
 function openDD(wh){
   if(!document.getElementById(wh+'Search').classList.contains('chosen'))
     renderDD(wh,PORTS.slice(0,80),'');
+  positionDD(wh);
   document.getElementById(wh+'DD').classList.add('open');
+}
+function positionDD(wh){
+  // On mobile: anchor dropdown top to just below the input field
+  // using fixed positioning so it doesn't shift the page layout
+  if(window.innerWidth > 640) return;
+  const inp = document.getElementById(wh+'Search');
+  const dd  = document.getElementById(wh+'DD');
+  const rect = inp.getBoundingClientRect();
+  dd.style.top = (rect.bottom + 6) + 'px';
 }
 function closeDD(wh){setTimeout(()=>document.getElementById(wh+'DD').classList.remove('open'),260);}
 function renderDD(wh,list,q){
@@ -1524,7 +1685,7 @@ function renderDD(wh,list,q){
   if(!list.length){el.innerHTML='<div class="ddi"><span class="ddi-meta">No ports found</span></div>';return;}
   list.forEach(p=>{
     const d=document.createElement('div');d.className='ddi';
-    const nm=q?p.name.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<b style="color:#f5c842">$1</b>'):p.name;
+    const nm=q?p.name.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<b style="color:#e8384f">$1</b>'):p.name;
     d.innerHTML=`<span><span class="ddi-name">${nm}</span><span class="ddi-meta">&nbsp;${p.country}</span></span><span class="ddi-tag">${p.region||''}</span>`;
     d.onmousedown=e=>{e.preventDefault();pickPort(wh,p);};
     el.appendChild(d);
