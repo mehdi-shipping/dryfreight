@@ -787,8 +787,16 @@ function scoreCandidate(candOrig, candDest, candVt, candTier, oR, dR, vt){
   const dScore = corridorScore(candDest, dR);
   const vScore = vesselScore(candVt, vt);
 
-  // If both origin and destination score zero, this fixture is useless
-  if(oScore === 0 && dScore === 0) return 0;
+  // Qualification rule:
+  //   Normal case: both sides must score >= 20 (same corridor minimum)
+  //   Exception: if one side is an exact region match (40), the other
+  //   may be adjacent (12) — e.g. ECSA→Europe qualifies for USG→Europe
+  //   This prevents intra-regional fixtures from matching cross-ocean voyages
+  //   while still allowing close-but-not-identical corridor matches.
+  const qualifies = (oScore >= 20 && dScore >= 20)
+                 || (oScore === 40 && dScore >= 12)
+                 || (dScore === 40 && oScore >= 12);
+  if(!qualifies) return 0;
 
   let raw = oScore + dScore + vScore;
 
