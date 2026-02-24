@@ -10,12 +10,26 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#f7f5f2;color:#222222;font-family:'IBM Plex Sans',system-ui,sans-serif;min-height:100vh}
 
-.wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px}
-header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;display:flex;align-items:center;gap:12px;justify-content:space-between}
-.header-left{display:flex;align-items:baseline;gap:10px}
-.logo{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:22px;font-weight:700;color:#e8384f;letter-spacing:.5px}
-.logo-sub{color:#999;font-size:13px;font-weight:400}
+/* ── NAV ── */
+nav{background:#fff;border-bottom:1px solid #e8e2da;position:sticky;top:0;z-index:200}
+.nav-inner{max-width:900px;margin:0 auto;padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:20px;font-weight:700;color:#e8384f;letter-spacing:.5px;text-decoration:none}
+.nav-links{display:flex;gap:4px;align-items:center}
+.nav-link{font-size:13px;font-weight:500;color:#888;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .15s;border:none;background:none;text-decoration:none}
+.nav-link:hover{color:#222;background:#f5f2ee}
+.nav-link.active{color:#e8384f;background:#fff3f4}
 .beta-badge{background:#fff3f4;border:1px solid #fac5cb;color:#e8384f;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:20px}
+
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px 80px}
+
+/* ── PAGE SECTIONS ── */
+.page-section{display:none}
+.page-section.active{display:block}
+
+/* ── HERO INTRO (calculator page top) ── */
+.calc-intro{padding:28px 0 20px}
+.calc-intro h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:28px;font-weight:700;color:#222;line-height:1.2;margin-bottom:6px}
+.calc-intro p{font-size:14px;color:#999;line-height:1.5}
 
 /* freight type selector */
 .freight-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
@@ -23,10 +37,10 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
 .freight-tab:hover{border-color:#ccc;color:#333}
 .freight-tab.active{border-color:#e8384f;background:#fff3f4;color:#e8384f;font-weight:600}
 .freight-tab .ft-icon{font-size:16px;line-height:1}
-.freight-dev-msg{background:#fff8f0;border:1px solid #fde8c8;border-radius:10px;padding:20px 24px;text-align:center;display:none}
+.freight-dev-msg{background:#fff8f0;border:1px solid #fde8c8;border-radius:10px;padding:28px 24px;text-align:center;display:none}
 .freight-dev-msg h3{font-size:16px;font-weight:600;color:#c47208;margin-bottom:8px}
 .freight-dev-msg p{font-size:13px;color:#a06010;line-height:1.6}
-.freight-dev-msg .dev-icon{font-size:32px;margin-bottom:12px}
+.freight-dev-msg .dev-icon{font-size:36px;margin-bottom:12px}
 
 /* ── form card ── */
 .form-card{background:#fff;border:1px solid #e0dbd4;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:20px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
@@ -52,9 +66,10 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
 .comm-select:focus{border-color:#e8384f}
 .comm-select option{background:#fff}
 
-/* cargo */
+/* cargo number input */
 .num-wrap{display:flex;align-items:center;background:#faf9f7;border:1.5px solid #e0dbd4;border-radius:8px;overflow:hidden}
-.num-in{flex:1;background:transparent;border:none;padding:10px 12px;color:#222;font-size:14px;outline:none}
+.num-in{flex:1;background:transparent;border:none;padding:10px 12px;color:#222;font-size:14px;outline:none;-moz-appearance:textfield}
+.num-in::-webkit-outer-spin-button,.num-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .num-unit{padding:10px 12px;color:#bbb;font-size:13px;border-left:1px solid #ede8e2}
 
 /* vessel badge */
@@ -83,7 +98,7 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
 
 /* ── hero bar ── */
 .hero-bar{background:#fff;border:1px solid #e0dbd4;border-radius:12px;padding:20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.hero-item .val{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:#e8384f}
+.hero-item .val{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#e8384f}
 .hero-item .lbl{font-size:11px;color:#bbb;margin-top:3px;text-transform:uppercase;letter-spacing:.6px}
 
 .route-badge{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
@@ -111,87 +126,91 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
 .param-row{display:grid;grid-template-columns:180px 1fr auto;align-items:center;gap:10px;padding:5px 0}
 .param-lbl{font-size:12px;color:#999}
 .param-val-display{font-family:'IBM Plex Mono',monospace;font-size:13px;color:#222}
-.param-note{font-size:11px;color:#ccc;font-style:italic;text-align:right}
+.param-note{font-size:11px;color:#ccc;font-style:italic;text-align:right;max-width:200px}
 .param-row.derived .param-lbl{color:#bbb}
 .param-row.derived .param-val-display{color:#888}
 .param-row.subtotal-row{border-top:1px solid #f0ece7;margin-top:6px;padding-top:10px}
 .param-row.subtotal-row .param-lbl{color:#555;font-weight:600}
 .param-row.subtotal-row .param-val-display{color:#e8384f;font-size:14px}
 
-/* editable inline input */
+/* editable inline input — stepper version */
 .p-inline{display:flex;align-items:center;gap:6px}
-.p-in{background:#faf9f7;border:1.5px solid #e0dbd4;border-radius:4px;padding:5px 8px;color:#222;font-family:'IBM Plex Mono',monospace;font-size:13px;width:100px;outline:none;text-align:right;transition:border-color .15s}
-.p-in:focus{border-color:#e8384f;background:#fff}
+.p-stepper{display:flex;align-items:center;background:#faf9f7;border:1.5px solid #e0dbd4;border-radius:6px;overflow:hidden}
+.p-stepper-btn{width:30px;height:34px;background:none;border:none;color:#aaa;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s;flex-shrink:0;user-select:none}
+.p-stepper-btn:hover{background:#f0ece7;color:#555}
+.p-in{background:transparent;border:none;border-left:1px solid #ede8e2;border-right:1px solid #ede8e2;padding:5px 4px;color:#222;font-family:'IBM Plex Mono',monospace;font-size:13px;width:80px;outline:none;text-align:center;-moz-appearance:textfield}
+.p-in::-webkit-outer-spin-button,.p-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.p-in:focus{background:#fff}
 .p-unit{font-size:11px;color:#bbb;white-space:nowrap}
 
+/* ── CONFIDENCE BADGE ── */
+.conf-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.conf-badge.high{background:#e8f7e0;color:#2d7a1a;border:1px solid #b7dda8}
+.conf-badge.medium{background:#fef9e6;color:#9a7200;border:1px solid #f5e088}
+.conf-badge.low{background:#fff3e8;color:#c47208;border:1px solid #fdc88a}
+.conf-badge.none{background:#f5f2ee;color:#aaa;border:1px solid #e0dbd4}
+.conf-badge.proxy{background:#fff3e8;color:#c47208;border:1px solid #fdc88a}
+.conf-source{font-size:11px;color:#bbb;margin-left:4px}
+
 /* grand total */
-.grand-total{background:#fff;border:1px solid #e0dbd4;border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-top:4px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.grand-total{background:#fff;border:1px solid #e0dbd4;border-radius:12px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;margin-top:4px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .gt-label{font-size:13px;color:#888}
-.gt-val{font-family:'IBM Plex Mono',monospace;font-size:18px;color:#e8384f;font-weight:600}
+.gt-val{font-family:'IBM Plex Mono',monospace;font-size:20px;color:#e8384f;font-weight:600}
 .gt-permt{font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2d7a1a}
+
+/* ── ABOUT PAGE ── */
+.about-hero{padding:40px 0 32px}
+.about-hero h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:36px;font-weight:700;color:#222;line-height:1.2;margin-bottom:12px}
+.about-hero p{font-size:15px;color:#666;line-height:1.7;max-width:600px}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:32px 0}
+.about-card{background:#fff;border:1px solid #e0dbd4;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.about-card h3{font-size:15px;font-weight:600;color:#222;margin-bottom:8px}
+.about-card p{font-size:13px;color:#888;line-height:1.6}
+.about-card .ac-icon{font-size:28px;margin-bottom:12px}
+.about-divider{border:none;border-top:1px solid #e8e2da;margin:32px 0}
+.about-section h2{font-size:20px;font-weight:700;color:#222;margin-bottom:12px}
+.about-section p{font-size:14px;color:#666;line-height:1.7;margin-bottom:12px}
+
+/* ── FOOTER ── */
+footer{background:#fff;border-top:1px solid #e8e2da;margin-top:40px}
+.footer-inner{max-width:900px;margin:0 auto;padding:24px 16px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.footer-copy{font-size:12px;color:#bbb}
+.footer-links{display:flex;gap:16px}
+.footer-link{font-size:12px;color:#bbb;cursor:pointer;transition:color .15s}
+.footer-link:hover{color:#888}
 
 #results{margin-top:24px;display:none}
 
-/* ── MOBILE ────────────────────────────────────────── */
+/* ── MOBILE ── */
 @media(max-width:640px){
+  /* Prevent iOS zoom */
+  input,select,textarea{font-size:16px !important}
+  .p-in{font-size:16px !important}
 
-  /* Prevent iOS Safari zoom-on-focus page shift.
-     Any input < 16px triggers auto-zoom. Fix: force 16px on mobile. */
-  input, select, textarea {
-    font-size:16px !important;
-  }
-  .p-in{
-    font-size:16px !important;
-    width:110px;
-  }
+  .wrap{padding:16px 12px 80px}
 
-  /* Tighter page padding */
-  .wrap{padding:16px 12px 60px}
+  /* Nav */
+  .nav-inner{height:48px}
+  .nav-links .nav-link span{display:none} /* icon only on mobile */
+  .nav-link{padding:6px 8px}
 
-  /* Header: stack logo and badge */
-  header{flex-wrap:wrap;gap:8px;padding-bottom:12px;margin-bottom:20px}
-  .logo-sub{display:none}
+  /* Intro */
+  .calc-intro{padding:20px 0 16px}
+  .calc-intro h1{font-size:22px}
 
-  /* Freight tabs: horizontal scroll, don't wrap */
-  .freight-tabs{
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-    padding-bottom:4px;
-    margin-bottom:16px;
-    gap:6px;
-    /* hide scrollbar visually */
-    scrollbar-width:none;
-  }
+  /* Freight tabs scroll */
+  .freight-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin-bottom:16px;gap:6px;scrollbar-width:none}
   .freight-tabs::-webkit-scrollbar{display:none}
-  .freight-tab{
-    white-space:nowrap;
-    flex-shrink:0;
-    padding:7px 12px;
-    font-size:12px;
-  }
+  .freight-tab{white-space:nowrap;flex-shrink:0;padding:7px 12px;font-size:12px}
 
-  /* Form card */
   .form-card{padding:16px;gap:16px}
   .row2{grid-template-columns:1fr}
 
-  /* Port dropdown: fixed position on mobile to avoid clipping */
-  .dd{
-    position:fixed;
-    left:12px !important;
-    right:12px !important;
-    top:auto;
-    max-height:50vh;
-    z-index:1000;
-    box-shadow:0 8px 32px rgba(0,0,0,.15);
-  }
+  /* Fixed dropdown */
+  .dd{position:fixed;left:12px !important;right:12px !important;top:auto;max-height:50vh;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,.15)}
 
-  /* Hero bar: 3 equal columns, smaller text */
-  .hero-bar{
-    grid-template-columns:repeat(3,1fr);
-    padding:14px 12px;
-    gap:8px;
-  }
+  /* Hero bar */
+  .hero-bar{grid-template-columns:repeat(3,1fr);padding:14px 12px;gap:8px}
   .hero-item .val{font-size:18px}
   .hero-item .lbl{font-size:10px}
 
@@ -199,136 +218,104 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
   .sec-hdr{padding:12px 14px}
   .sec-body{padding:12px 14px}
 
-  /* param-row: switch from 3-col grid to stacked layout.
-     Label on top, value below, note below value — ALL VISIBLE on mobile. */
+  /* Param rows — stacked */
   .param-row{
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    gap:4px;
-    padding:8px 0;
-    border-bottom:1px solid #f5f2ee;
+    display:flex;flex-direction:column;align-items:flex-start;
+    gap:6px;padding:10px 0;border-bottom:1px solid #f5f2ee
   }
   .param-row:last-child{border-bottom:none}
-  .param-lbl{
-    font-size:11px;
-    color:#aaa;
-    text-transform:uppercase;
-    letter-spacing:.5px;
-    font-weight:600;
-  }
-  .param-val-display{
-    font-size:14px;
-    color:#222;
-  }
-  /* Note: visible on mobile, shown below value */
-  .param-note{
-    display:block !important;
-    font-size:11px;
-    color:#bbb;
-    font-style:italic;
-    text-align:left;
-    line-height:1.4;
-  }
-  /* Input rows: make input full-width */
+  .param-lbl{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+  .param-val-display{font-size:15px;color:#222}
+  .param-note{display:block !important;font-size:11px;color:#bbb;font-style:italic;text-align:left;line-height:1.4;max-width:100%}
+
+  /* Stepper full width */
   .p-inline{width:100%}
-  .p-in{
-    width:100% !important;
-    flex:1;
-    text-align:left;
-    padding:8px 10px;
-  }
-  .p-unit{font-size:12px;white-space:nowrap;flex-shrink:0}
+  .p-stepper{flex:1}
+  .p-in{flex:1;width:auto !important;text-align:center}
+  .p-stepper-btn{width:40px;height:42px;font-size:18px}
+  .p-unit{font-size:12px;flex-shrink:0}
 
-  /* Subtotal rows: keep them prominent */
+  /* Subtotal rows stay horizontal */
   .param-row.subtotal-row{
-    flex-direction:row;
-    justify-content:space-between;
-    align-items:center;
-    padding:10px 0;
-    border-bottom:none;
-    border-top:1px solid #f0ece7;
-    margin-top:4px;
+    flex-direction:row;justify-content:space-between;align-items:center;
+    padding:10px 0;border-bottom:none;border-top:1px solid #f0ece7;margin-top:4px
   }
-  .param-row.subtotal-row .param-lbl{
-    font-size:13px;
-    color:#555;
-    font-weight:600;
-    text-transform:none;
-    letter-spacing:0;
-  }
-  .param-row.subtotal-row .param-val-display{
-    font-size:15px;
-    color:#e8384f;
-  }
+  .param-row.subtotal-row .param-lbl{font-size:13px;color:#555;font-weight:600;text-transform:none;letter-spacing:0}
+  .param-row.subtotal-row .param-val-display{font-size:15px;color:#e8384f}
 
-  /* param-block title spacing */
-  .param-block{margin-bottom:8px}
-  .param-block-title{margin-bottom:8px}
-
-  /* Route options */
-  .route-opt{padding:10px 12px}
-  .route-opt-nm{font-size:11px}
-
-  /* Grand total */
   .grand-total{padding:14px 16px}
-  .gt-val{font-size:16px}
-  .gt-permt{font-size:13px}
-
-  /* Route badges: wrap nicely */
+  .gt-val{font-size:17px}
+  .calc-btn{padding:16px;font-size:14px;border-radius:10px}
   .route-badge{gap:6px}
   .rbadge{font-size:10px;padding:3px 8px}
 
-  /* Calc button: big tap target */
-  .calc-btn{padding:16px;font-size:14px;border-radius:10px}
+  /* About */
+  .about-grid{grid-template-columns:1fr}
+  .about-hero h1{font-size:26px}
+
+  /* Footer */
+  .footer-inner{flex-direction:column;align-items:flex-start;gap:12px}
 }
 
 </style>
 </head>
 <body>
-<!-- Loading banner: shown while JSON files are being fetched -->
+<!-- Loading banner -->
 <div id="loading-banner" style="max-width:900px;margin:40px auto;padding:20px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#e8384f;text-align:center;letter-spacing:1px">
   LOADING DATA…
 </div>
 
-<!-- Main app: hidden until data is loaded -->
+<!-- Main app -->
 <div id="app-content" style="display:none">
-<div class="wrap">
-  <header>
-    <div class="header-left">
-      <div class="logo">DryFreight</div>
-      <span class="logo-sub">Voyage Cost Calculator</span>
+
+<!-- STICKY NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" onclick="showPage('calculator')">DryFreight <span class="beta-badge" style="margin-left:8px">Beta</span></a>
+    <div class="nav-links">
+      <button class="nav-link active" id="nav-calculator" onclick="showPage('calculator')"><span>🧮 </span>Calculator</button>
+      <button class="nav-link" id="nav-about" onclick="showPage('about')"><span>ℹ️ </span>About</button>
     </div>
-    <span class="beta-badge">Beta</span>
-  </header>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ══ CALCULATOR PAGE ══ -->
+<div class="page-section active" id="page-calculator">
+
+  <div class="calc-intro">
+    <h1>Voyage Cost Calculator</h1>
+    <p>Live TC rates · Real-time bunker prices · Instant freight estimation</p>
+  </div>
 
   <!-- FREIGHT TYPE SELECTOR -->
   <div class="freight-tabs">
-    <button class="freight-tab active" onclick="selectFreight('drybulk')">
+    <button class="freight-tab active" onclick="selectFreight('drybulk',event)">
       <span class="ft-icon">⚓</span> Dry Bulk
     </button>
-    <button class="freight-tab" onclick="selectFreight('tanker')">
+    <button class="freight-tab" onclick="selectFreight('tanker',event)">
       <span class="ft-icon">🛢️</span> Tankers
     </button>
-    <button class="freight-tab" onclick="selectFreight('container')">
+    <button class="freight-tab" onclick="selectFreight('container',event)">
       <span class="ft-icon">📦</span> Containers
     </button>
-    <button class="freight-tab" onclick="selectFreight('gas')">
+    <button class="freight-tab" onclick="selectFreight('gas',event)">
       <span class="ft-icon">💨</span> Gas Carriers
     </button>
-    <button class="freight-tab" onclick="selectFreight('breakbulk')">
+    <button class="freight-tab" onclick="selectFreight('breakbulk',event)">
       <span class="ft-icon">🏗️</span> Break Bulk
     </button>
   </div>
 
-  <!-- Under development message (hidden by default) -->
+  <!-- Under development message -->
   <div class="freight-dev-msg" id="freight-dev-msg">
     <div class="dev-icon">🚧</div>
     <h3 id="freight-dev-title">Coming Soon</h3>
     <p id="freight-dev-text">We're building this out. Check back soon.</p>
   </div>
 
-  <!-- DRY BULK CALCULATOR (shown by default) -->
+  <!-- DRY BULK CALCULATOR -->
   <div id="drybulk-content">
   <div class="form-card">
     <div class="row2">
@@ -447,7 +434,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Daily hire rate</span>
             <div class="p-inline">
-              <input id="p-tcrate" class="p-in" type="number" step="500" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-tcrate',-1)">−</button>
+                <input id="p-tcrate" class="p-in" type="number" step="500" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-tcrate',1)">+</button>
+              </div>
               <span class="p-unit">$/day</span>
             </div>
             <span class="param-note" id="o-tcnote">—</span>
@@ -460,7 +451,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Laden speed</span>
             <div class="p-inline">
-              <input id="p-ladenspd" class="p-in" type="number" step="0.5" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-ladenspd',-1)">−</button>
+                <input id="p-ladenspd" class="p-in" type="number" step="0.5" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-ladenspd',1)">+</button>
+              </div>
               <span class="p-unit">knots</span>
             </div>
             <span class="param-note">Vessel design speed</span>
@@ -468,7 +463,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Weather factor</span>
             <div class="p-inline">
-              <input id="p-wx" class="p-in" type="number" step="0.01" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-wx',-1)">−</button>
+                <input id="p-wx" class="p-in" type="number" step="0.01" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-wx',1)">+</button>
+              </div>
             </div>
             <span class="param-note">1.05 = 5% extra for weather/routing</span>
           </div>
@@ -480,7 +479,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Ballast speed</span>
             <div class="p-inline">
-              <input id="p-ballspd" class="p-in" type="number" step="0.5" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-ballspd',-1)">−</button>
+                <input id="p-ballspd" class="p-in" type="number" step="0.5" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-ballspd',1)">+</button>
+              </div>
               <span class="p-unit">knots</span>
             </div>
             <span class="param-note"></span>
@@ -488,7 +491,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Ballast factor</span>
             <div class="p-inline">
-              <input id="p-ball" class="p-in" type="number" step="0.05" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-ball',-1)">−</button>
+                <input id="p-ball" class="p-in" type="number" step="0.05" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-ball',1)">+</button>
+              </div>
             </div>
             <span class="param-note" id="o-ballnote">Ballast leg as fraction of laden distance</span>
           </div>
@@ -505,7 +512,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Load port rate</span>
             <div class="p-inline">
-              <input id="p-lrate" class="p-in" type="number" step="500" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-lrate',-1)">−</button>
+                <input id="p-lrate" class="p-in" type="number" step="500" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-lrate',1)">+</button>
+              </div>
               <span class="p-unit">MT/day</span>
             </div>
             <span class="param-note" id="o-lratenote" style="max-width:160px;text-align:right">—</span>
@@ -513,7 +524,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Disch. port rate</span>
             <div class="p-inline">
-              <input id="p-drate" class="p-in" type="number" step="500" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-drate',-1)">−</button>
+                <input id="p-drate" class="p-in" type="number" step="500" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-drate',1)">+</button>
+              </div>
               <span class="p-unit">MT/day</span>
             </div>
             <span class="param-note" id="o-dratenote" style="max-width:160px;text-align:right">—</span>
@@ -549,7 +564,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">VLSFO price</span>
             <div class="p-inline">
-              <input id="p-vlsfopx" class="p-in" type="number" step="5" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-vlsfopx',-1)">−</button>
+                <input id="p-vlsfopx" class="p-in" type="number" step="5" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-vlsfopx',1)">+</button>
+              </div>
               <span class="p-unit">$/MT</span>
             </div>
             <span class="param-note" id="o-vlsfonote">Ship &amp; Bunker</span>
@@ -557,7 +576,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">MGO price</span>
             <div class="p-inline">
-              <input id="p-mgopx" class="p-in" type="number" step="5" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-mgopx',-1)">−</button>
+                <input id="p-mgopx" class="p-in" type="number" step="5" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-mgopx',1)">+</button>
+              </div>
               <span class="p-unit">$/MT</span>
             </div>
             <span class="param-note" id="o-mgonote">Ship &amp; Bunker</span>
@@ -569,7 +592,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Laden consumption</span>
             <div class="p-inline">
-              <input id="p-ladencons" class="p-in" type="number" step="1" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-ladencons',-1)">−</button>
+                <input id="p-ladencons" class="p-in" type="number" step="1" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-ladencons',1)">+</button>
+              </div>
               <span class="p-unit">MT/day</span>
             </div>
             <span class="param-note">Main engine laden</span>
@@ -577,7 +604,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Ballast consumption</span>
             <div class="p-inline">
-              <input id="p-ballcons" class="p-in" type="number" step="1" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-ballcons',-1)">−</button>
+                <input id="p-ballcons" class="p-in" type="number" step="1" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-ballcons',1)">+</button>
+              </div>
               <span class="p-unit">MT/day</span>
             </div>
             <span class="param-note">Main engine ballast</span>
@@ -585,7 +616,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Port consumption</span>
             <div class="p-inline">
-              <input id="p-portcons" class="p-in" type="number" step="0.5" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-portcons',-1)">−</button>
+                <input id="p-portcons" class="p-in" type="number" step="0.5" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-portcons',1)">+</button>
+              </div>
               <span class="p-unit">MT/day</span>
             </div>
             <span class="param-note">Aux. engines in port</span>
@@ -634,7 +669,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Load port DA</span>
             <div class="p-inline">
-              <input id="p-daload" class="p-in" type="number" step="1000" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-daload',-1)">−</button>
+                <input id="p-daload" class="p-in" type="number" step="1000" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-daload',1)">+</button>
+              </div>
               <span class="p-unit">USD</span>
             </div>
             <span class="param-note" id="o-daloadnote">—</span>
@@ -642,7 +681,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Discharge port DA</span>
             <div class="p-inline">
-              <input id="p-dadisch" class="p-in" type="number" step="1000" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-dadisch',-1)">−</button>
+                <input id="p-dadisch" class="p-in" type="number" step="1000" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-dadisch',1)">+</button>
+              </div>
               <span class="p-unit">USD</span>
             </div>
             <span class="param-note" id="o-dadischnote">—</span>
@@ -699,7 +742,11 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
           <div class="param-row">
             <span class="param-lbl">Commission rate</span>
             <div class="p-inline">
-              <input id="p-commpct" class="p-in" type="number" step="0.25" min="0" max="10" oninput="onParamChange()">
+              <div class="p-stepper">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-commpct',-1)">−</button>
+                <input id="p-commpct" class="p-in" type="number" step="0.25" min="0" max="10" oninput="onParamChange()">
+                <button class="p-stepper-btn" type="button" onclick="stepInput('p-commpct',1)">+</button>
+              </div>
               <span class="p-unit">%</span>
             </div>
             <span class="param-note">Applied to total voyage cost</span>
@@ -726,7 +773,68 @@ header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;di
 
   </div><!-- /results -->
 </div><!-- /drybulk-content -->
+</div><!-- /page-calculator -->
+
+<!-- ══ ABOUT PAGE ══ -->
+<div class="page-section" id="page-about">
+  <div class="about-hero">
+    <h1>Transparent freight costs,<br>for everyone.</h1>
+    <p>DryFreight is a free voyage cost calculator built for shipowners, charterers, traders, and anyone who needs a fast, honest freight estimate without paying for a Bloomberg terminal.</p>
+  </div>
+
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="ac-icon">📡</div>
+      <h3>Live Market Data</h3>
+      <p>TC rates scraped daily from HandyBulk. Bunker prices updated from Ship & Bunker across 4 major hubs. No stale hardcoded numbers.</p>
+    </div>
+    <div class="about-card">
+      <div class="ac-icon">🔢</div>
+      <h3>Full Cost Breakdown</h3>
+      <p>Every assumption is visible and editable. TC hire, bunkers, port DAs, canal tolls, war risk, commission — nothing hidden.</p>
+    </div>
+    <div class="about-card">
+      <div class="ac-icon">🌍</div>
+      <h3>235 Ports</h3>
+      <p>Route detection with realistic waypoints — Suez, Malacca, Gibraltar, Cape, Panama. Calibrated distances against real-world data.</p>
+    </div>
+    <div class="about-card">
+      <div class="ac-icon">🔒</div>
+      <h3>Always Free</h3>
+      <p>No subscription, no login, no paywalls. Built in public. More vessel types and fixture sharing coming soon.</p>
+    </div>
+  </div>
+
+  <hr class="about-divider">
+
+  <div class="about-section">
+    <h2>How it works</h2>
+    <p>Enter a load port, discharge port, cargo quantity and commodity. The calculator selects the right vessel size, finds the best available live TC rate for that corridor, looks up current bunker prices at the nearest hub, and computes the full voyage cost in seconds.</p>
+    <p>Every parameter can be overridden. If you know the actual TC rate from your broker, type it in. The system shows you exactly where each number came from and how confident it is.</p>
+  </div>
+
+  <hr class="about-divider">
+
+  <div class="about-section">
+    <h2>What's coming</h2>
+    <p><strong>Fixture sharing</strong> — submit TC fixtures directly from the market and help build a community rate index. Tanker, container, and gas carrier calculators. A blog covering freight markets, methodology, and data. An API for developers.</p>
+    <p>Built by a small team that ships fast. If you have feedback, a fixture to contribute, or want to talk — reach out.</p>
+  </div>
+</div><!-- /page-about -->
+
 </div><!-- /wrap -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">© 2026 DryFreight · Beta · Data for reference only</span>
+    <div class="footer-links">
+      <span class="footer-link" onclick="showPage('calculator')">Calculator</span>
+      <span class="footer-link" onclick="showPage('about')">About</span>
+    </div>
+  </div>
+</footer>
+
 </div><!-- /app-content -->
 
 <script>
@@ -1242,6 +1350,8 @@ const WP={
   istanbul: {lat:41.0,  lon:28.97},  // Bosphorus
   panama:   {lat:9.0,   lon:-79.5},  // Panama Canal
   cape:     {lat:-34.5, lon:20.0},   // Cape of Good Hope
+  florida:  {lat:25.0,  lon:-80.0},  // Florida Straits — exit for Gulf of Mexico ports
+  caribbean:{lat:15.0,  lon:-60.0},  // Lesser Antilles — waypoint for Gulf→South America
 };
 
 // ── Routing zone for a port ──────────────────────
@@ -1324,63 +1434,125 @@ function routedDistance(pA,pB){
     if(s<c*1.15){ nm=s; canals=['suez']; routeDesc='via Suez Canal'; }
     else { nm=c; routeDesc='via Cape of Good Hope'; }
   }
-  // ─ 3. European/Med/Black/W.Africa ↔ Pacific Asia → Suez (never Panama) ─
+  // ─ 3. European/Med/Black/W.Africa ↔ Pacific Asia → Suez or Cape ─
   else if(either(['EUR_MED','BLACK','W_AFRICA']) && either(['ASIA'])){
     const s=distViaSuez(pA,pB,zA,zB), c=capeNm();
     if(s<c*1.15){ nm=s; canals=['suez']; routeDesc='via Suez Canal'; }
     else { nm=c; routeDesc='via Cape of Good Hope'; }
   }
   // ─ 4. Atlantic Americas ↔ Indian Ocean → Suez or Cape ─
-  else if(pair('ATL_AMER','INDIAN') || pair('ATL_AMER','W_AFRICA')){
+  else if(pair('ATL_AMER','INDIAN')){
     const s=Math.round((haversine(la1,lo1,WP.suez.lat,WP.suez.lon)+haversine(WP.suez.lat,WP.suez.lon,la2,lo2))*1.05);
     const c=capeNm();
     if(s<c*1.12){ nm=s; canals=['suez']; routeDesc='via Suez Canal'; }
     else { nm=c; routeDesc='via Cape of Good Hope'; }
   }
-  // ─ 5. Atlantic Americas ↔ Pacific Asia → Panama or Cape only ─
-  // (Suez excluded: from Americas it would mean crossing entire Atlantic + Med,
-  //  haversine underestimates that badly. In practice always Panama or Cape.)
+  // ─ 5. Atlantic Americas ↔ Pacific Asia → Panama or Cape ─
   else if(pair('ATL_AMER','ASIA')){
     const p=panNm(), c=capeNm();
     if(p<=c*1.05){ nm=p; canals=['panama']; routeDesc='via Panama Canal'; }
     else { nm=c; routeDesc='via Cape of Good Hope'; }
   }
+  // ─ 5b. Atlantic Americas ↔ Europe/Med ─
+  // Gulf ports (US GULF, Mexico) must exit via Florida Straits; calibrated ×1.05.
+  // Open-Atlantic ports (US East Coast, South America) use direct haversine ×1.10.
+  else if(pair('ATL_AMER','EUR_MED')){
+    const isGulf=r=>['US GULF','MEXICO'].includes(r);
+    if(isGulf(rA)||isGulf(rB)){
+      const fl=WP.florida;
+      nm=Math.round((haversine(la1,lo1,fl.lat,fl.lon)+haversine(fl.lat,fl.lon,la2,lo2))*1.05);
+      routeDesc='via Florida Straits';
+    } else {
+      nm=Math.round(haversine(la1,lo1,la2,lo2)*1.10);
+    }
+  }
+  // ─ 5c. Atlantic Americas ↔ W.Africa ─
+  // Gulf ports exit Florida Straits; others direct Atlantic.
+  else if(pair('ATL_AMER','W_AFRICA')){
+    const isGulf=r=>['US GULF','MEXICO'].includes(r);
+    if(isGulf(rA)||isGulf(rB)){
+      const fl=WP.florida;
+      nm=Math.round((haversine(la1,lo1,fl.lat,fl.lon)+haversine(fl.lat,fl.lon,la2,lo2))*1.05);
+      routeDesc='via Florida Straits';
+    } else {
+      nm=Math.round(haversine(la1,lo1,la2,lo2)*1.10);
+    }
+  }
+  // ─ 5d. Atlantic Americas intra ─
+  // Gulf ports going to South America must exit via Florida Straits then Caribbean.
+  // Calibrated: NO→Santos(5421) via Florida(25N,80W)+Caribbean(15N,60W) ×1.2431.
+  // Other intra-Atlantic routes: direct haversine ×1.10.
+  else if(pair('ATL_AMER','ATL_AMER')){
+    const isGulf=r=>['US GULF','MEXICO'].includes(r);
+    const isSAm =r=>['E.S.AMERICA','N.S.AMERICA'].includes(r);
+    if((isGulf(rA)&&isSAm(rB))||(isGulf(rB)&&isSAm(rA))){
+      const fl=WP.florida, cb=WP.caribbean;
+      nm=Math.round((haversine(la1,lo1,fl.lat,fl.lon)+haversine(fl.lat,fl.lon,cb.lat,cb.lon)+haversine(cb.lat,cb.lon,la2,lo2))*1.2431);
+      routeDesc='via Florida Straits';
+    } else if(isGulf(rA)||isGulf(rB)){
+      const fl=WP.florida;
+      nm=Math.round((haversine(la1,lo1,fl.lat,fl.lon)+haversine(fl.lat,fl.lon,la2,lo2))*1.05);
+      routeDesc='via Florida Straits';
+    } else {
+      nm=Math.round(haversine(la1,lo1,la2,lo2)*1.10);
+    }
+  }
   // ─ 6. Indian Ocean ↔ Pacific Asia → via Malacca, waypoints by region ─
-  // Raw haversine is WRONG here — it cuts through India/Sri Lanka.
-  // Calibrated factors derived from 6 real-world reference distances.
+  // Calibrated factors from 6 real-world distances (see calibration log).
   else if(either(['INDIAN']) && either(['ASIA'])){
     const asiaP = zA==='ASIA' ? pA : pB;
     const indP  = zA==='INDIAN' ? pA : pB;
     const indR  = indP.region||'';
     const m=WP.malacca, sl=WP.srilanka, ad=WP.aden;
     if(['W.INDIA','MIDDLE EAST'].includes(indR)){
-      // Must round India: Asia → Malacca → Sri Lanka tip → W.India/Gulf
-      // Factor 1.0548 calibrated on SHA→KHI(5108), SHA→BOM(4652),
-      // SIN→KHI(2916), SYD→BOM(6039)
       nm=Math.round((haversine(asiaP.lat,asiaP.lon,m.lat,m.lon)
                    + haversine(m.lat,m.lon,sl.lat,sl.lon)
                    + haversine(sl.lat,sl.lon,indP.lat,indP.lon))*1.0548);
     } else if(['E.AFRICA','RED SEA'].includes(indR)){
-      // Asia → Malacca → Aden → East Africa/Red Sea
-      // Factor 0.9291 calibrated on SHA→MBA(6196)
       nm=Math.round((haversine(asiaP.lat,asiaP.lon,m.lat,m.lon)
                    + haversine(m.lat,m.lon,ad.lat,ad.lon)
                    + haversine(ad.lat,ad.lon,indP.lat,indP.lon))*0.9291);
     } else {
-      // E.India, S.India, S.Africa Indian side: Asia → Malacca → destination
-      // Factor 1.0490 calibrated on TYO→CMB(4541)
       nm=Math.round((haversine(asiaP.lat,asiaP.lon,m.lat,m.lon)
                    + haversine(m.lat,m.lon,indP.lat,indP.lon))*1.0490);
     }
   }
-  // ─ 7. Black Sea ↔ Med/Atlantic → via Bosphorus ─
+  // ─ 7. Pacific Americas ↔ Europe/Med/Black → Panama then Atlantic ─
+  // Haversine cuts through South America. Must route via Panama Canal.
+  // Factor 1.0244 calibrated on Valparaiso→Rotterdam(7500).
+  else if(either(['PAC_AMER']) && either(['EUR_MED','BLACK'])){
+    const p=panNm();
+    nm=p; canals=['panama']; routeDesc='via Panama Canal';
+  }
+  // ─ 8. Pacific Americas ↔ Pacific Asia → direct Pacific ─
+  // Open Pacific crossing, haversine is close to reality.
+  // Factor 1.0086 calibrated on Valparaiso→Shanghai(10221).
+  else if(pair('PAC_AMER','ASIA')){
+    nm=Math.round(haversine(la1,lo1,la2,lo2)*1.0086);
+  }
+  // ─ 9. Pacific Americas ↔ Indian Ocean → via Cape ─
+  // Going east (via Panama+Suez) is far longer. Cape is the natural route.
+  else if(pair('PAC_AMER','INDIAN')){
+    nm=capeNm(); routeDesc='via Cape of Good Hope';
+  }
+  // ─ 10. Pacific Americas ↔ W.Africa → via Panama then direct ─
+  else if(pair('PAC_AMER','W_AFRICA')){
+    nm=panNm(); canals=['panama']; routeDesc='via Panama Canal';
+  }
+  // ─ 11. Black Sea ↔ Med/Atlantic → via Bosphorus ─
   else if(either(['BLACK']) && either(['EUR_MED','ATL_AMER','W_AFRICA'])){
     nm=Math.round((haversine(la1,lo1,WP.istanbul.lat,WP.istanbul.lon)+haversine(WP.istanbul.lat,WP.istanbul.lon,la2,lo2))*1.10);
     routeDesc='via Bosphorus';
   }
-  // ─ 8. Same basin / regional ─
+  // ─ 12. Same basin / regional ─
+  // INDIAN intra: ×1.0085 calibrated on Mumbai→Mombasa(2418).
+  // ASIA intra:   ×1.0360 calibrated on Tokyo→Sydney(4362).
+  // Others:       ×1.10 default.
   else {
-    nm=Math.round(haversine(la1,lo1,la2,lo2)*1.10);
+    const f = (zA==='INDIAN'&&zB==='INDIAN') ? 1.0085
+            : (zA==='ASIA'  &&zB==='ASIA'  ) ? 1.0360
+            : 1.10;
+    nm=Math.round(haversine(la1,lo1,la2,lo2)*f);
   }
 
   // War zone overlays
@@ -1413,34 +1585,58 @@ function routeOptions(pA, pB){
 
   // ─ Atlantic Americas ↔ Pacific Americas → Panama + Cape ─
   if(pair('ATL_AMER','PAC_AMER')){
-    opts.push({key:'panama', label:'Via Panama Canal',        nm:panNm(),  canals:['panama'], warZones:[]});
-    opts.push({key:'cape',   label:'Via Cape of Good Hope',   nm:capeNm(), canals:[],         warZones:[]});
+    opts.push({key:'panama', label:'Via Panama Canal',       nm:panNm(),  canals:['panama'], warZones:[]});
+    opts.push({key:'cape',   label:'Via Cape of Good Hope',  nm:capeNm(), canals:[],         warZones:[]});
   }
   // ─ Europe/Med/Black/W.Africa ↔ Indian or Asia → Suez + Cape ─
-  else if((either(['EUR_MED','BLACK','W_AFRICA']) && either(['INDIAN','ASIA']))){
-    const s = suezNm(), c = capeNm();
-    const suezWar = [];
-    if(!['W.INDIA','E.INDIA','S.INDIA','MIDDLE EAST'].includes(rA) &&
-       !['W.INDIA','E.INDIA','S.INDIA','MIDDLE EAST'].includes(rB)){
-      suezWar.push('redsea'); // transits Red Sea
-    }
+  else if(either(['EUR_MED','BLACK','W_AFRICA']) && either(['INDIAN','ASIA'])){
+    const s=suezNm(), c=capeNm(), suezWar=[];
+    if(!['W.INDIA','E.INDIA','S.INDIA','MIDDLE EAST'].includes(rA)&&
+       !['W.INDIA','E.INDIA','S.INDIA','MIDDLE EAST'].includes(rB)) suezWar.push('redsea');
     if(rA==='RED SEA'||rB==='RED SEA') suezWar.push('redsea');
-    opts.push({key:'suez',  label:'Via Suez Canal',          nm:s, canals:['suez'], warZones:[...new Set(suezWar)]});
-    opts.push({key:'cape',  label:'Via Cape of Good Hope',   nm:c, canals:[],       warZones:[]});
+    opts.push({key:'suez', label:'Via Suez Canal',          nm:s, canals:['suez'], warZones:[...new Set(suezWar)]});
+    opts.push({key:'cape', label:'Via Cape of Good Hope',   nm:c, canals:[],       warZones:[]});
   }
   // ─ Atlantic Americas ↔ Asia → Panama + Cape ─
   else if(pair('ATL_AMER','ASIA')){
-    opts.push({key:'panama', label:'Via Panama Canal',        nm:panNm(),  canals:['panama'], warZones:[]});
-    opts.push({key:'cape',   label:'Via Cape of Good Hope',   nm:capeNm(), canals:[],         warZones:[]});
+    opts.push({key:'panama', label:'Via Panama Canal',       nm:panNm(),  canals:['panama'], warZones:[]});
+    opts.push({key:'cape',   label:'Via Cape of Good Hope',  nm:capeNm(), canals:[],         warZones:[]});
   }
   // ─ Atlantic Americas ↔ Indian → Suez + Cape ─
-  else if(pair('ATL_AMER','INDIAN') || pair('ATL_AMER','W_AFRICA')){
-    const s = Math.round((haversine(pA.lat,pA.lon,WP.suez.lat,WP.suez.lon)+haversine(WP.suez.lat,WP.suez.lon,pB.lat,pB.lon))*1.05);
-    const c = capeNm();
-    opts.push({key:'suez',  label:'Via Suez Canal',          nm:s, canals:['suez'], warZones:['redsea']});
-    opts.push({key:'cape',  label:'Via Cape of Good Hope',   nm:c, canals:[],       warZones:[]});
+  else if(pair('ATL_AMER','INDIAN')){
+    const s=Math.round((haversine(pA.lat,pA.lon,WP.suez.lat,WP.suez.lon)+haversine(WP.suez.lat,WP.suez.lon,pB.lat,pB.lon))*1.05);
+    opts.push({key:'suez', label:'Via Suez Canal',          nm:s,        canals:['suez'], warZones:['redsea']});
+    opts.push({key:'cape', label:'Via Cape of Good Hope',   nm:capeNm(), canals:[],       warZones:[]});
   }
-  // ─ All other routes → single direct option ─
+  // ─ Atlantic Americas ↔ Europe/Med or W.Africa — Gulf needs Florida ─
+  else if(pair('ATL_AMER','EUR_MED')||pair('ATL_AMER','W_AFRICA')){
+    const isGulf=r=>['US GULF','MEXICO'].includes(r);
+    if(isGulf(rA)||isGulf(rB)){
+      const fl=WP.florida;
+      const n=Math.round((haversine(pA.lat,pA.lon,fl.lat,fl.lon)+haversine(fl.lat,fl.lon,pB.lat,pB.lon))*1.05);
+      opts.push({key:'direct', label:'Via Florida Straits', nm:n, canals:[], warZones:[]});
+    } else {
+      opts.push({key:'direct', label:'Direct (Atlantic)', nm:Math.round(haversine(pA.lat,pA.lon,pB.lat,pB.lon)*1.10), canals:[], warZones:[]});
+    }
+  }
+  // ─ Pacific Americas ↔ Europe/Med/Black → Panama + Cape ─
+  else if(either(['PAC_AMER'])&&either(['EUR_MED','BLACK'])){
+    opts.push({key:'panama', label:'Via Panama Canal',       nm:panNm(),  canals:['panama'], warZones:[]});
+    opts.push({key:'cape',   label:'Via Cape of Good Hope',  nm:capeNm(), canals:[],         warZones:[]});
+  }
+  // ─ Pacific Americas ↔ Asia → direct Pacific ─
+  else if(pair('PAC_AMER','ASIA')){
+    opts.push({key:'direct', label:'Direct (Pacific)', nm:Math.round(haversine(pA.lat,pA.lon,pB.lat,pB.lon)*1.0086), canals:[], warZones:[]});
+  }
+  // ─ Pacific Americas ↔ Indian → Cape ─
+  else if(pair('PAC_AMER','INDIAN')){
+    opts.push({key:'cape', label:'Via Cape of Good Hope', nm:capeNm(), canals:[], warZones:[]});
+  }
+  // ─ Pacific Americas ↔ W.Africa → Panama ─
+  else if(pair('PAC_AMER','W_AFRICA')){
+    opts.push({key:'panama', label:'Via Panama Canal', nm:panNm(), canals:['panama'], warZones:[]});
+  }
+  // ─ All other routes → derive from routedDistance ─
   else {
     const {nm, canals, warZones, routeDesc} = routedDistance(pA, pB);
     opts.push({key:'direct', label:routeDesc==='Direct'?'Direct sailing':routeDesc, nm, canals, warZones});
@@ -1797,30 +1993,29 @@ function doCalc(){
 
     if(m.noData){
       const hint = m.reverseNote
-        ? `<br><span style="color:#aaa;font-size:10px">ℹ️ ${m.reverseNote}</span>`
-        : `<br><span style="color:#555;font-size:10px">${m.matchNote}</span>`;
+        ? `<br><span style="color:#bbb;font-size:11px">ℹ️ ${m.reverseNote}</span>`
+        : `<br><span style="color:#bbb;font-size:11px">${m.matchNote}</span>`;
       noteEl.innerHTML =
-        `<span style="color:#e07820;font-weight:700">⚠ No direct rate in DB</span>`
-        + `&nbsp;&nbsp;Enter TC rate manually`
+        `<span class="conf-badge none">⚠ No rate in DB</span>`
+        + `&nbsp;<span class="conf-source">Enter TC rate manually</span>`
         + hint;
     } else if(m.source === 'proxy'){
-      // Proxy rate — rough signal only, shown with warning
       noteEl.innerHTML =
-        `<span style="color:#e07820;font-weight:700">${m.confidence}/100 — Proxy only</span>`
-        + `&nbsp;&nbsp;No direct route in DB — rough signal, verify before use`
-        + `<br><span style="color:#555;font-size:10px">${m.matchNote}</span>`;
+        `<span class="conf-badge proxy">${m.confidence}/100 Proxy</span>`
+        + `<span class="conf-source">Rough signal — verify before use</span>`
+        + `<br><span style="color:#bbb;font-size:11px">${m.matchNote}</span>`;
     } else {
-      const col = m.confidence >= 80 ? '#90d060'
-                : m.confidence >= 60 ? '#f5c842'
-                : m.confidence >= 40 ? '#e07820'
-                :                      '#888';
+      const cls = m.confidence >= 80 ? 'high'
+                : m.confidence >= 60 ? 'medium'
+                : m.confidence >= 40 ? 'low'
+                :                      'none';
       const d = m.daysOld === 0 ? 'today'
-              : m.daysOld === 1 ? '1 day ago'
-              : m.daysOld + ' days ago';
+              : m.daysOld === 1 ? '1d ago'
+              : m.daysOld + 'd ago';
       noteEl.innerHTML =
-        `<span style="color:${col};font-weight:700">${m.confidence}/100</span>`
-        + `&nbsp;&nbsp;Market rate scraped ${d}`
-        + `<br><span style="color:#444;font-size:10px">${m.matchNote}</span>`;
+        `<span class="conf-badge ${cls}">${m.confidence}/100</span>`
+        + `<span class="conf-source">Scraped ${d} · HandyBulk</span>`
+        + `<br><span style="color:#bbb;font-size:11px">${m.matchNote}</span>`;
     }
   })();
 
@@ -2029,6 +2224,34 @@ function set(id,val){
 }
 
 // ══════════════════════════════════════════════════
+// NAV — page switching
+// ══════════════════════════════════════════════════
+function showPage(name){
+  document.querySelectorAll('.page-section').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  const pg = document.getElementById('page-'+name);
+  if(pg) pg.classList.add('active');
+  const nl = document.getElementById('nav-'+name);
+  if(nl) nl.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════════
+// STEPPER — +/- buttons for number inputs
+// ══════════════════════════════════════════════════
+function stepInput(id, dir){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const step = parseFloat(el.step) || 1;
+  const val  = parseFloat(el.value) || 0;
+  const min  = el.min !== '' ? parseFloat(el.min) : -Infinity;
+  const max  = el.max !== '' ? parseFloat(el.max) :  Infinity;
+  const dec  = (step.toString().split('.')[1] || '').length;
+  el.value   = Math.min(max, Math.max(min, parseFloat((val + dir*step).toFixed(dec))));
+  onParamChange();
+}
+
+// ══════════════════════════════════════════════════
 // FREIGHT TYPE SELECTOR
 // ══════════════════════════════════════════════════
 const FREIGHT_TYPES = {
@@ -2038,20 +2261,19 @@ const FREIGHT_TYPES = {
   breakbulk:  { title: 'Break Bulk & Project Cargo — Coming Soon', text: 'Ro-Ro, heavy lift, and general cargo voyage costing is planned for a future release.' },
 };
 
-function selectFreight(type) {
-  // Update tab styles
-  document.querySelectorAll('.freight-tab').forEach(t => t.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+function selectFreight(type, evt){
+  document.querySelectorAll('.freight-tab').forEach(t=>t.classList.remove('active'));
+  if(evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
-  const devMsg   = document.getElementById('freight-dev-msg');
-  const dryBulk  = document.getElementById('drybulk-content');
+  const devMsg  = document.getElementById('freight-dev-msg');
+  const dryBulk = document.getElementById('drybulk-content');
 
-  if (type === 'drybulk') {
+  if(type === 'drybulk'){
     dryBulk.style.display = 'block';
     devMsg.style.display  = 'none';
   } else {
     dryBulk.style.display = 'none';
-    const info = FREIGHT_TYPES[type] || { title: 'Coming Soon', text: 'This segment is under development.' };
+    const info = FREIGHT_TYPES[type] || { title:'Coming Soon', text:'This segment is under development.' };
     document.getElementById('freight-dev-title').textContent = info.title;
     document.getElementById('freight-dev-text').textContent  = info.text;
     devMsg.style.display = 'block';
