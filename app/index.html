@@ -1084,13 +1084,14 @@ function haversine(la1,lo1,la2,lo2){
   return 2*R*Math.asin(Math.sqrt(a));
 }
 const WP={
-  suez:    {lat:30.0,  lon:32.5},   // Suez Canal entrance
-  aden:    {lat:12.5,  lon:44.5},   // Bab-el-Mandeb / Gulf of Aden
-  malacca: {lat:1.5,   lon:103.8},  // Strait of Malacca
-  gib:     {lat:36.0,  lon:-5.4},   // Gibraltar
-  istanbul:{lat:41.0,  lon:28.97},  // Bosphorus
-  panama:  {lat:9.0,   lon:-79.5},  // Panama Canal
-  cape:    {lat:-34.5, lon:20.0},   // Cape of Good Hope
+  suez:     {lat:30.0,  lon:32.5},   // Suez Canal entrance
+  aden:     {lat:12.5,  lon:44.5},   // Bab-el-Mandeb / Gulf of Aden
+  malacca:  {lat:1.5,   lon:103.8},  // Strait of Malacca
+  srilanka: {lat:6.0,   lon:80.5},   // Southern tip of India/Sri Lanka — routing around subcontinent
+  gib:      {lat:36.0,  lon:-5.4},   // Gibraltar
+  istanbul: {lat:41.0,  lon:28.97},  // Bosphorus
+  panama:   {lat:9.0,   lon:-79.5},  // Panama Canal
+  cape:     {lat:-34.5, lon:20.0},   // Cape of Good Hope
 };
 
 // ── Routing zone for a port ──────────────────────
@@ -1194,9 +1195,33 @@ function routedDistance(pA,pB){
     if(p<=c*1.05){ nm=p; canals=['panama']; routeDesc='via Panama Canal'; }
     else { nm=c; routeDesc='via Cape of Good Hope'; }
   }
-  // ─ 6. Indian Ocean ↔ Pacific Asia → direct (Malacca/Lombok) ─
+  // ─ 6. Indian Ocean ↔ Pacific Asia → via Malacca, waypoints by region ─
+  // Raw haversine is WRONG here — it cuts through India/Sri Lanka.
+  // Calibrated factors derived from 6 real-world reference distances.
   else if(either(['INDIAN']) && either(['ASIA'])){
-    nm=Math.round(haversine(la1,lo1,la2,lo2)*1.10);
+    const asiaP = zA==='ASIA' ? pA : pB;
+    const indP  = zA==='INDIAN' ? pA : pB;
+    const indR  = indP.region||'';
+    const m=WP.malacca, sl=WP.srilanka, ad=WP.aden;
+    if(['W.INDIA','MIDDLE EAST'].includes(indR)){
+      // Must round India: Asia → Malacca → Sri Lanka tip → W.India/Gulf
+      // Factor 1.0548 calibrated on SHA→KHI(5108), SHA→BOM(4652),
+      // SIN→KHI(2916), SYD→BOM(6039)
+      nm=Math.round((haversine(asiaP.lat,asiaP.lon,m.lat,m.lon)
+                   + haversine(m.lat,m.lon,sl.lat,sl.lon)
+                   + haversine(sl.lat,sl.lon,indP.lat,indP.lon))*1.0548);
+    } else if(['E.AFRICA','RED SEA'].includes(indR)){
+      // Asia → Malacca → Aden → East Africa/Red Sea
+      // Factor 0.9291 calibrated on SHA→MBA(6196)
+      nm=Math.round((haversine(asiaP.lat,asiaP.lon,m.lat,m.lon)
+                   + haversine(m.lat,m.lon,ad.lat,ad.lon)
+                   + haversine(ad.lat,ad.lon,indP.lat,indP.lon))*0.9291);
+    } else {
+      // E.India, S.India, S.Africa Indian side: Asia → Malacca → destination
+      // Factor 1.0490 calibrated on TYO→CMB(4541)
+      nm=Math.round((haversine(asiaP.lat,asiaP.lon,m.lat,m.lon)
+                   + haversine(m.lat,m.lon,indP.lat,indP.lon))*1.0490);
+    }
   }
   // ─ 7. Black Sea ↔ Med/Atlantic → via Bosphorus ─
   else if(either(['BLACK']) && either(['EUR_MED','ATL_AMER','W_AFRICA'])){
