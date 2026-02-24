@@ -8,115 +8,127 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0d0d10;color:#e8e4dc;font-family:'IBM Plex Sans',system-ui,sans-serif;min-height:100vh}
+body{background:#f7f5f2;color:#222222;font-family:'IBM Plex Sans',system-ui,sans-serif;min-height:100vh}
 
 .wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px}
-header{border-bottom:1px solid #1e1e2a;padding-bottom:16px;margin-bottom:28px;display:flex;align-items:baseline;gap:12px}
-.logo{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:22px;font-weight:700;color:#f5c842;letter-spacing:.5px}
-.logo span{color:#555;font-size:13px;font-weight:400;margin-left:4px}
+header{border-bottom:1px solid #e8e2da;padding-bottom:16px;margin-bottom:28px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.header-left{display:flex;align-items:baseline;gap:10px}
+.logo{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:22px;font-weight:700;color:#e8384f;letter-spacing:.5px}
+.logo-sub{color:#999;font-size:13px;font-weight:400}
+.beta-badge{background:#fff3f4;border:1px solid #fac5cb;color:#e8384f;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:20px}
+
+/* freight type selector */
+.freight-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.freight-tab{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;border:1.5px solid #e0dbd4;background:#fff;font-size:13px;font-weight:500;color:#666;cursor:pointer;transition:all .15s}
+.freight-tab:hover{border-color:#ccc;color:#333}
+.freight-tab.active{border-color:#e8384f;background:#fff3f4;color:#e8384f;font-weight:600}
+.freight-tab .ft-icon{font-size:16px;line-height:1}
+.freight-dev-msg{background:#fff8f0;border:1px solid #fde8c8;border-radius:10px;padding:20px 24px;text-align:center;display:none}
+.freight-dev-msg h3{font-size:16px;font-weight:600;color:#c47208;margin-bottom:8px}
+.freight-dev-msg p{font-size:13px;color:#a06010;line-height:1.6}
+.freight-dev-msg .dev-icon{font-size:32px;margin-bottom:12px}
 
 /* ── form card ── */
-.form-card{background:#111118;border:1px solid #1e1e2a;border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:20px}
+.form-card{background:#fff;border:1px solid #e0dbd4;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:20px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.field label{display:block;font-size:11px;font-weight:600;color:#666;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+.field label{display:block;font-size:11px;font-weight:600;color:#aaa;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
 
 /* port search */
 .port-wrap{position:relative}
-.port-in{width:100%;background:#0d0d10;border:1px solid #222230;border-radius:6px;padding:10px 12px;color:#e8e4dc;font-size:14px;outline:none;transition:border-color .15s}
-.port-in:focus{border-color:#f5c842}
-.port-in.chosen{border-color:#2a4a1a;color:#90d060}
-.port-meta{font-size:11px;color:#555;margin-top:4px;min-height:16px}
-.dd{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#16161f;border:1px solid #222230;border-radius:6px;max-height:220px;overflow-y:auto;z-index:100;display:none}
+.port-in{width:100%;background:#faf9f7;border:1.5px solid #e0dbd4;border-radius:8px;padding:10px 12px;color:#222;font-size:14px;outline:none;transition:border-color .15s}
+.port-in:focus{border-color:#e8384f;background:#fff}
+.port-in.chosen{border-color:#b7dda8;color:#2d7a1a}
+.port-meta{font-size:11px;color:#bbb;margin-top:4px;min-height:16px}
+.dd{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid #e0dbd4;border-radius:8px;max-height:220px;overflow-y:auto;z-index:100;display:none;box-shadow:0 4px 16px rgba(0,0,0,.08)}
 .dd.open{display:block}
 .ddi{padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px}
-.ddi:hover{background:#1e1e2a}
-.ddi-name{color:#e8e4dc}
-.ddi-meta{color:#555;font-size:11px;margin-left:6px}
-.ddi-tag{font-size:10px;color:#444;background:#1a1a24;padding:2px 6px;border-radius:3px}
+.ddi:hover{background:#faf9f7}
+.ddi-name{color:#222}
+.ddi-meta{color:#bbb;font-size:11px;margin-left:6px}
+.ddi-tag{font-size:10px;color:#999;background:#f5f3f0;padding:2px 6px;border-radius:3px}
 
 /* commodity select */
-.comm-select{width:100%;background:#0d0d10;border:1px solid #222230;border-radius:6px;padding:10px 12px;color:#e8e4dc;font-size:14px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
-.comm-select:focus{border-color:#333}
-.comm-select option{background:#16161f}
+.comm-select{width:100%;background:#faf9f7;border:1.5px solid #e0dbd4;border-radius:8px;padding:10px 12px;color:#222;font-size:14px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.comm-select:focus{border-color:#e8384f}
+.comm-select option{background:#fff}
 
 /* cargo */
-.num-wrap{display:flex;align-items:center;background:#0d0d10;border:1px solid #222230;border-radius:6px;overflow:hidden}
-.num-in{flex:1;background:transparent;border:none;padding:10px 12px;color:#e8e4dc;font-size:14px;outline:none}
-.num-unit{padding:10px 12px;color:#555;font-size:13px;border-left:1px solid #1a1a24}
+.num-wrap{display:flex;align-items:center;background:#faf9f7;border:1.5px solid #e0dbd4;border-radius:8px;overflow:hidden}
+.num-in{flex:1;background:transparent;border:none;padding:10px 12px;color:#222;font-size:14px;outline:none}
+.num-unit{padding:10px 12px;color:#bbb;font-size:13px;border-left:1px solid #ede8e2}
 
 /* vessel badge */
-.vessel-auto{background:#0d0d10;border:1px solid #1e1e2a;border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
-.va-name{font-size:14px;font-weight:600;color:#f5c842}
-.va-detail{font-size:11px;color:#555;margin-top:2px}
-.va-badge{font-size:10px;font-weight:700;color:#555;background:#1a1a24;padding:3px 7px;border-radius:3px;letter-spacing:.5px}
+.vessel-auto{background:#faf9f7;border:1.5px solid #e0dbd4;border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.va-name{font-size:14px;font-weight:600;color:#e8384f}
+.va-detail{font-size:11px;color:#bbb;margin-top:2px}
+.va-badge{font-size:10px;font-weight:700;color:#aaa;background:#f0ece7;padding:3px 7px;border-radius:3px;letter-spacing:.5px}
 
 /* calc button */
-.calc-btn{width:100%;padding:14px;background:#f5c842;color:#0d0d10;font-size:13px;font-weight:700;letter-spacing:1.5px;border:none;border-radius:6px;cursor:pointer;transition:background .15s}
-.calc-btn:hover:not(:disabled){background:#ffd966}
-.calc-btn:disabled{background:#1a1a24;color:#333;cursor:not-allowed}
+.calc-btn{width:100%;padding:14px;background:#e8384f;color:#fff;font-size:13px;font-weight:700;letter-spacing:1.5px;border:none;border-radius:8px;cursor:pointer;transition:background .15s}
+.calc-btn:hover:not(:disabled){background:#d42d43}
+.calc-btn:disabled{background:#ede8e2;color:#bbb;cursor:not-allowed}
 
 /* route option selector */
 .route-opts-wrap{display:none}
 .route-opts-wrap.visible{display:block}
-.route-opts-label{font-size:11px;font-weight:600;color:#666;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px}
+.route-opts-label{font-size:11px;font-weight:600;color:#aaa;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px}
 .route-opts{display:flex;flex-direction:column;gap:6px}
-.route-opt{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#0d0d10;border:1px solid #222230;border-radius:6px;cursor:pointer;transition:border-color .15s,background .15s}
-.route-opt:hover{background:#13131a;border-color:#333}
-.route-opt.selected{border-color:#f5c842;background:#13110a}
-.route-opt input[type=radio]{accent-color:#f5c842;width:15px;height:15px;flex-shrink:0;cursor:pointer}
-.route-opt-name{font-size:13px;font-weight:600;color:#e8e4dc;flex:1}
-.route-opt-nm{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#f5c842;white-space:nowrap}
-.route-opt-warn{font-size:10px;color:#e07820;background:#1a1200;border:1px solid #2e2000;padding:2px 6px;border-radius:3px;white-space:nowrap}
-
+.route-opt{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#faf9f7;border:1.5px solid #e0dbd4;border-radius:8px;cursor:pointer;transition:border-color .15s,background .15s}
+.route-opt:hover{background:#f5f3f0;border-color:#ccc}
+.route-opt.selected{border-color:#e8384f;background:#fff6f7}
+.route-opt input[type=radio]{accent-color:#e8384f;width:15px;height:15px;flex-shrink:0;cursor:pointer}
+.route-opt-name{font-size:13px;font-weight:600;color:#222;flex:1}
+.route-opt-nm{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#e8384f;white-space:nowrap}
+.route-opt-warn{font-size:10px;color:#c47208;background:#fff8f0;border:1px solid #fde8c8;padding:2px 6px;border-radius:3px;white-space:nowrap}
 
 /* ── hero bar ── */
-.hero-bar{background:#111118;border:1px solid #1e1e2a;border-radius:10px;padding:20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
-.hero-item .val{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:#f5c842}
-.hero-item .lbl{font-size:11px;color:#555;margin-top:3px;text-transform:uppercase;letter-spacing:.6px}
+.hero-bar{background:#fff;border:1px solid #e0dbd4;border-radius:12px;padding:20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.hero-item .val{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:#e8384f}
+.hero-item .lbl{font-size:11px;color:#bbb;margin-top:3px;text-transform:uppercase;letter-spacing:.6px}
 
 .route-badge{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
-.rbadge{font-size:11px;color:#666;background:#111118;border:1px solid #1e1e2a;padding:4px 10px;border-radius:20px}
-.rbadge.via{color:#f5c842;border-color:#2a2400}
+.rbadge{font-size:11px;color:#999;background:#fff;border:1px solid #e0dbd4;padding:4px 10px;border-radius:20px}
+.rbadge.via{color:#e8384f;border-color:#fac5cb;background:#fff6f7}
 
-.warn{background:#1a1200;border:1px solid #2e2000;border-radius:6px;padding:10px 14px;font-size:12px;color:#b88820;margin-bottom:12px}
+.warn{background:#fff8f0;border:1px solid #fde8c8;border-radius:8px;padding:10px 14px;font-size:12px;color:#c47208;margin-bottom:12px}
 
 /* ── section cards ── */
-.sec-card{background:#111118;border:1px solid #1e1e2a;border-radius:10px;overflow:hidden;margin-bottom:10px}
+.sec-card{background:#fff;border:1px solid #e0dbd4;border-radius:12px;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .sec-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;cursor:pointer;user-select:none;transition:background .1s}
-.sec-hdr:hover{background:#161620}
-.sec-num{font-size:10px;font-weight:700;color:#444;letter-spacing:1px;margin-right:8px;text-transform:uppercase}
-.sec-title{font-size:13px;font-weight:600;color:#bbb;letter-spacing:.3px}
-.sec-total{font-family:'IBM Plex Mono',monospace;font-size:14px;color:#f5c842}
-.sec-chevron{color:#444;font-size:12px;margin-left:8px;transition:transform .2s}
+.sec-hdr:hover{background:#faf9f7}
+.sec-num{font-size:10px;font-weight:700;color:#ccc;letter-spacing:1px;margin-right:8px;text-transform:uppercase}
+.sec-title{font-size:13px;font-weight:600;color:#888;letter-spacing:.3px}
+.sec-total{font-family:'IBM Plex Mono',monospace;font-size:14px;color:#e8384f}
+.sec-chevron{color:#ccc;font-size:12px;margin-left:8px;transition:transform .2s}
 .sec-hdr.open .sec-chevron{transform:rotate(180deg)}
-.sec-body{border-top:1px solid #1a1a24;padding:16px 20px;display:none}
+.sec-body{border-top:1px solid #f0ece7;padding:16px 20px;display:none}
 .sec-body.open{display:block}
 
 /* param rows */
 .param-block{margin-bottom:16px}
 .param-block:last-child{margin-bottom:0}
-.param-block-title{font-size:10px;font-weight:700;color:#444;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1a1a24}
+.param-block-title{font-size:10px;font-weight:700;color:#ccc;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0ece7}
 .param-row{display:grid;grid-template-columns:180px 1fr auto;align-items:center;gap:10px;padding:5px 0}
-.param-lbl{font-size:12px;color:#777}
-.param-val-display{font-family:'IBM Plex Mono',monospace;font-size:13px;color:#e8e4dc}
-.param-note{font-size:11px;color:#444;font-style:italic;text-align:right}
-.param-row.derived .param-lbl{color:#555}
-.param-row.derived .param-val-display{color:#aaa}
-.param-row.subtotal-row{border-top:1px solid #1a1a24;margin-top:6px;padding-top:10px}
-.param-row.subtotal-row .param-lbl{color:#ccc;font-weight:600}
-.param-row.subtotal-row .param-val-display{color:#f5c842;font-size:14px}
+.param-lbl{font-size:12px;color:#999}
+.param-val-display{font-family:'IBM Plex Mono',monospace;font-size:13px;color:#222}
+.param-note{font-size:11px;color:#ccc;font-style:italic;text-align:right}
+.param-row.derived .param-lbl{color:#bbb}
+.param-row.derived .param-val-display{color:#888}
+.param-row.subtotal-row{border-top:1px solid #f0ece7;margin-top:6px;padding-top:10px}
+.param-row.subtotal-row .param-lbl{color:#555;font-weight:600}
+.param-row.subtotal-row .param-val-display{color:#e8384f;font-size:14px}
 
 /* editable inline input */
 .p-inline{display:flex;align-items:center;gap:6px}
-.p-in{background:#0d0d10;border:1px solid #252535;border-radius:4px;padding:5px 8px;color:#e8e4dc;font-family:'IBM Plex Mono',monospace;font-size:13px;width:100px;outline:none;text-align:right;transition:border-color .15s}
-.p-in:focus{border-color:#f5c842;background:#0f0f15}
-.p-unit{font-size:11px;color:#555;white-space:nowrap}
+.p-in{background:#faf9f7;border:1.5px solid #e0dbd4;border-radius:4px;padding:5px 8px;color:#222;font-family:'IBM Plex Mono',monospace;font-size:13px;width:100px;outline:none;text-align:right;transition:border-color .15s}
+.p-in:focus{border-color:#e8384f;background:#fff}
+.p-unit{font-size:11px;color:#bbb;white-space:nowrap}
 
 /* grand total */
-.grand-total{background:#0d0d10;border:1px solid #1e1e2a;border-radius:10px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.grand-total{background:#fff;border:1px solid #e0dbd4;border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-top:4px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .gt-label{font-size:13px;color:#888}
-.gt-val{font-family:'IBM Plex Mono',monospace;font-size:18px;color:#f5c842;font-weight:600}
-.gt-permt{font-family:'IBM Plex Mono',monospace;font-size:14px;color:#90d060}
+.gt-val{font-family:'IBM Plex Mono',monospace;font-size:18px;color:#e8384f;font-weight:600}
+.gt-permt{font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2d7a1a}
 
 #results{margin-top:24px;display:none}
 
@@ -125,7 +137,7 @@ header{border-bottom:1px solid #1e1e2a;padding-bottom:16px;margin-bottom:28px;di
 </head>
 <body>
 <!-- Loading banner: shown while JSON files are being fetched -->
-<div id="loading-banner" style="max-width:900px;margin:40px auto;padding:20px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#f5c842;text-align:center;letter-spacing:1px">
+<div id="loading-banner" style="max-width:900px;margin:40px auto;padding:20px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#e8384f;text-align:center;letter-spacing:1px">
   LOADING DATA…
 </div>
 
@@ -133,10 +145,41 @@ header{border-bottom:1px solid #1e1e2a;padding-bottom:16px;margin-bottom:28px;di
 <div id="app-content" style="display:none">
 <div class="wrap">
   <header>
-    <div class="logo">DryFreight <span>Voyage Cost Calculator</span></div>
+    <div class="header-left">
+      <div class="logo">DryFreight</div>
+      <span class="logo-sub">Voyage Cost Calculator</span>
+    </div>
+    <span class="beta-badge">Beta</span>
   </header>
 
-  <!-- INPUT FORM -->
+  <!-- FREIGHT TYPE SELECTOR -->
+  <div class="freight-tabs">
+    <button class="freight-tab active" onclick="selectFreight('drybulk')">
+      <span class="ft-icon">⚓</span> Dry Bulk
+    </button>
+    <button class="freight-tab" onclick="selectFreight('tanker')">
+      <span class="ft-icon">🛢️</span> Tankers
+    </button>
+    <button class="freight-tab" onclick="selectFreight('container')">
+      <span class="ft-icon">📦</span> Containers
+    </button>
+    <button class="freight-tab" onclick="selectFreight('gas')">
+      <span class="ft-icon">💨</span> Gas Carriers
+    </button>
+    <button class="freight-tab" onclick="selectFreight('breakbulk')">
+      <span class="ft-icon">🏗️</span> Break Bulk
+    </button>
+  </div>
+
+  <!-- Under development message (hidden by default) -->
+  <div class="freight-dev-msg" id="freight-dev-msg">
+    <div class="dev-icon">🚧</div>
+    <h3 id="freight-dev-title">Coming Soon</h3>
+    <p id="freight-dev-text">We're building this out. Check back soon.</p>
+  </div>
+
+  <!-- DRY BULK CALCULATOR (shown by default) -->
+  <div id="drybulk-content">
   <div class="form-card">
     <div class="row2">
       <div class="field">
@@ -532,6 +575,7 @@ header{border-bottom:1px solid #1e1e2a;padding-bottom:16px;margin-bottom:28px;di
     </div>
 
   </div><!-- /results -->
+</div><!-- /drybulk-content -->
 </div><!-- /wrap -->
 </div><!-- /app-content -->
 
@@ -1799,8 +1843,34 @@ function set(id,val){
 }
 
 // ══════════════════════════════════════════════════
-// INIT
+// FREIGHT TYPE SELECTOR
 // ══════════════════════════════════════════════════
+const FREIGHT_TYPES = {
+  tanker:     { title: 'Tankers — Coming Soon', text: 'Crude oil, product tankers, and chemical tankers are next on our roadmap. Live VLCC, Suezmax, and Aframax TC rates are being integrated. Stay tuned.' },
+  container:  { title: 'Container Shipping — Coming Soon', text: 'Box freight rate calculator covering major liner routes is under development. TEU-based cost breakdowns and spot rate integration are planned.' },
+  gas:        { title: 'Gas Carriers — Coming Soon', text: 'LNG and LPG carrier voyage estimation is on our roadmap. This is a highly specialised market and we want to get it right before launching.' },
+  breakbulk:  { title: 'Break Bulk & Project Cargo — Coming Soon', text: 'Ro-Ro, heavy lift, and general cargo voyage costing is planned for a future release.' },
+};
+
+function selectFreight(type) {
+  // Update tab styles
+  document.querySelectorAll('.freight-tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  const devMsg   = document.getElementById('freight-dev-msg');
+  const dryBulk  = document.getElementById('drybulk-content');
+
+  if (type === 'drybulk') {
+    dryBulk.style.display = 'block';
+    devMsg.style.display  = 'none';
+  } else {
+    dryBulk.style.display = 'none';
+    const info = FREIGHT_TYPES[type] || { title: 'Coming Soon', text: 'This segment is under development.' };
+    document.getElementById('freight-dev-title').textContent = info.title;
+    document.getElementById('freight-dev-text').textContent  = info.text;
+    devMsg.style.display = 'block';
+  }
+}
 
 // ══════════════════════════════════════════════════
 // BOOT
