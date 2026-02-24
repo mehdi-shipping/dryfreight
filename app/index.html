@@ -815,19 +815,13 @@ function matchLive(oR, dR, vt){
     if(s > bestScore){ bestScore = s; best = r; }
   }
 
-  console.log(`[matchLive] ${oR}→${dR} ${vt}: ${LIVE_RATES.length} rates checked, best score=${bestScore.toFixed(1)}, rate=${best?.rate}, threshold=45`);
-
   // Threshold: effective score must be at least 45 to use
   if(!best || bestScore < 45) return null;
 
-  // Base confidence from freshness, then scale by match quality
-  // Perfect match (100 raw × 1.0 fresh) = keeps tier confidence
-  // Partial match scales down proportionally
   const matchQuality = Math.min(bestScore / 100, 1.0);
   let conf = Math.round(best.confidence * matchQuality);
   conf = Math.max(conf, 20);
 
-  // Build a human-readable match note
   const oExact = best.originRegion      === oR ? '✓' : '~';
   const dExact = best.destinationRegion === dR ? '✓' : '~';
   const vExact = best.vesselType        === vt ? '✓' : '~';
@@ -845,6 +839,56 @@ function matchLive(oR, dR, vt){
   };
 }
 
+// ── Proxy match when no direct live rate found ──────
+// When the DB has no qualifying rate for the requested
+// corridor pair, try to find the BEST available live rate
+// ignoring the oScore/dScore minimums — strictly for
+// information, shown with very low confidence so the user
+// knows to verify it. Better than a blank field with no signal.
+function matchProxy(oR, dR, vt){
+  let best = null, bestScore = 0;
+
+  // Scoring without the qualification gate — pure corridor distance
+  function proxyScore(r){
+    const VESSEL_ORDER = ['HANDY','SUPRAMAX','ULTRAMAX','PANAMAX','CAPESIZE'];
+    function corScore(fr, tr){
+      if(fr===tr) return 40;
+      if(corridorOf(fr)===corridorOf(tr)) return 30;
+      if(corridorsAdjacent(corridorOf(fr),corridorOf(tr))) return 12;
+      return 0;
+    }
+    const os = corScore(r.originRegion, oR);
+    const ds = corScore(r.destinationRegion, dR);
+    if(os===0 && ds===0) return 0;  // completely irrelevant, skip
+    const a = VESSEL_ORDER.indexOf(r.vesselType);
+    const b = VESSEL_ORDER.indexOf(vt);
+    const vs = (a<0||b<0) ? 0 : [20,10,3,0,0][Math.min(Math.abs(a-b),4)];
+    let raw = os + ds + vs;
+    if(isReverse(r.originRegion, r.destinationRegion, oR, dR)) raw *= 0.15;
+    return raw * freshnessFactor(r.tier);
+  }
+
+  for(const r of LIVE_RATES){
+    const s = proxyScore(r);
+    if(s > bestScore){ bestScore = s; best = r; }
+  }
+
+  if(!best || bestScore < 20) return null;  // nothing useful at all
+
+  // Cap proxy confidence at 25/100 — it's a rough signal only
+  const age = best.daysOld === 0 ? 'today' : best.daysOld + 'd old';
+  return {
+    rate:        best.rate,
+    confidence:  Math.min(25, Math.round(bestScore * 0.25)),
+    tier:        best.tier,
+    daysOld:     best.daysOld,
+    scrapedDate: best.scrapedDate,
+    rawLine:     best.rawLine,
+    source:      'proxy',
+    matchNote:   `${best.vesselType} ${best.originRegion}→${best.destinationRegion} (${age}, proxy score:${Math.round(bestScore)})`,
+  };
+}
+
 // ── Find best matching trade lane (no rates — structure only) ──
 // LANES is the list of known trade corridors from fixtures.json.
 // We use it only to identify the closest structural match and
@@ -859,28 +903,33 @@ function bestLaneMatch(oR, dR, vt){
 }
 
 // ── Main TC rate lookup ─────────────────────────────
-// Tries live scraped rates first.
-// If no live match found, returns noData=true so the
-// UI prompts the user to enter the rate manually.
-// No hardcoded rate values — ever.
 function matchTC(oR, dR, vt){
   const live = matchLive(oR, dR, vt);
+  if(live) return { ...live, noData: false };
 
-  if(live){
-    return {
-      rate:        live.rate,
-      confidence:  live.confidence,
-      tier:        live.tier,
-      daysOld:     live.daysOld,
-      scrapedDate: live.scrapedDate,
-      source:      'live',
-      matchNote:   live.matchNote,
-      noData:      false,
-    };
+  // No direct match — try proxy (any live rate with corridor relevance)
+  const proxy = matchProxy(oR, dR, vt);
+  if(proxy) return { ...proxy, noData: false };
+
+  // Check if we have the reverse direction — useful context for the user
+  // even though we can't use the rate directly
+  let reverseNote = null;
+  for(const r of LIVE_RATES){
+    const os = corridorScore(r.originRegion, dR);  // fixture origin vs OUR destination
+    const ds = corridorScore(r.destinationRegion, oR); // fixture dest vs OUR origin
+    if(os >= 30 && ds >= 30 && r.vesselType === vt){
+      const age = r.daysOld === 0 ? 'today' : r.daysOld + 'd ago';
+      reverseNote = `Reverse rate (${r.originRegion}→${r.destinationRegion}) is $${r.rate.toLocaleString()}/day (${age}) — backhaul typically 35–50% of this`;
+      break;
+    }
   }
 
-  // No live match — identify closest lane for context only
+  // Genuinely no usable data — user must enter manually
   const lm = bestLaneMatch(oR, dR, vt);
+  const laneNote = lm
+    ? `Closest lane: ${lm.lane.vt} ${lm.lane.oR}→${lm.lane.dR}`
+    : 'No matching lane found';
+
   return {
     rate:        null,
     confidence:  0,
@@ -888,9 +937,8 @@ function matchTC(oR, dR, vt){
     daysOld:     null,
     scrapedDate: null,
     source:      'nodata',
-    matchNote:   lm
-      ? `Closest lane: ${lm.lane.vt} ${lm.lane.oR}→${lm.lane.dR} (score:${Math.round(lm.score)})`
-      : 'No matching lane found',
+    matchNote:   reverseNote || laneNote,
+    reverseNote,
     noData:      true,
   };
 }
@@ -955,11 +1003,8 @@ async function loadData(){
     if(liveData && liveData.success && liveData.rates && liveData.rates.length > 0){
       LIVE_RATES = liveData.rates;
       console.log(`[DryFreight] Live rates loaded: ${LIVE_RATES.length} routes`);
-      // Log a sample to verify region format
-      const sample = LIVE_RATES.slice(0,3).map(r=>`${r.vesselType} ${r.originRegion}→${r.destinationRegion} $${r.rate}`);
-      console.log('[DryFreight] Sample rates:', sample.join(' | '));
     } else {
-      console.warn('[DryFreight] Live rates unavailable. liveData:', JSON.stringify(liveData)?.slice(0,200));
+      console.warn('[DryFreight] Live rates unavailable.');
     }
 
     // Bunker prices — non-fatal if missing
@@ -1521,10 +1566,18 @@ function doCalc(){
     if(!noteEl) return;
 
     if(m.noData){
-      // No live rate available — prompt user to enter manually
+      const hint = m.reverseNote
+        ? `<br><span style="color:#aaa;font-size:10px">ℹ️ ${m.reverseNote}</span>`
+        : `<br><span style="color:#555;font-size:10px">${m.matchNote}</span>`;
       noteEl.innerHTML =
-        `<span style="color:#e07820;font-weight:700">⚠ No live rate found</span>`
-        + `&nbsp;&nbsp;Enter TC rate manually below`
+        `<span style="color:#e07820;font-weight:700">⚠ No direct rate in DB</span>`
+        + `&nbsp;&nbsp;Enter TC rate manually`
+        + hint;
+    } else if(m.source === 'proxy'){
+      // Proxy rate — rough signal only, shown with warning
+      noteEl.innerHTML =
+        `<span style="color:#e07820;font-weight:700">${m.confidence}/100 — Proxy only</span>`
+        + `&nbsp;&nbsp;No direct route in DB — rough signal, verify before use`
         + `<br><span style="color:#555;font-size:10px">${m.matchNote}</span>`;
     } else {
       const col = m.confidence >= 80 ? '#90d060'
