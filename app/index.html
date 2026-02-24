@@ -672,6 +672,11 @@ function vesselForCargo(mt){
 // ══════════════════════════════════════════════════
 
 // Region → corridor mapping
+// ATL_AMER is deliberately split into two distinct markets:
+//   N_ATL_AMER = US Gulf, East Coast, Caribbean, Mexico
+//   S_ATL_AMER = East South America (ECSA), North SA
+// These trade at structurally different rate levels and must
+// not be treated as equivalent destinations.
 const CORRIDOR = {
   'N.EUROPE':      'ATL_EUR',
   'BALTIC':        'ATL_EUR',
@@ -690,32 +695,36 @@ const CORRIDOR = {
   'CHINA':         'ASIA',
   'N.ASIA':        'ASIA',
   'AUSTRALIA':     'ASIA',
-  'US GULF':       'ATL_AMER',
-  'US EAST COAST': 'ATL_AMER',
-  'E.S.AMERICA':   'ATL_AMER',
-  'N.S.AMERICA':   'ATL_AMER',
-  'CARIBBEAN':     'ATL_AMER',
-  'MEXICO':        'ATL_AMER',
+  'US GULF':       'N_ATL_AMER',
+  'US EAST COAST': 'N_ATL_AMER',
+  'CARIBBEAN':     'N_ATL_AMER',
+  'MEXICO':        'N_ATL_AMER',
+  'E.N.AMERICA':   'N_ATL_AMER',
+  'E.S.AMERICA':   'S_ATL_AMER',
+  'N.S.AMERICA':   'S_ATL_AMER',
   'W.S.AMERICA':   'PAC_AMER',
-  'E.N.AMERICA':   'ATL_AMER',
 };
 
 // Adjacent corridor pairs (bidirectional)
 const CORRIDOR_ADJ = [
-  ['ATL_EUR',  'E_MED'],     // Med ↔ North Sea/Atlantic
-  ['ATL_EUR',  'W_AFR'],     // Europe ↔ West Africa
-  ['ATL_EUR',  'ATL_AMER'],  // Transatlantic
-  ['E_MED',    'RED_GULF'],  // Suez connection
-  ['E_MED',    'W_AFR'],     // Med ↔ West Africa
-  ['W_AFR',    'ATL_AMER'],  // West Africa ↔ Americas
-  ['W_AFR',    'S_AFR'],     // West ↔ South Africa
-  ['S_AFR',    'E_AFR'],     // South ↔ East Africa
-  ['S_AFR',    'INDIAN'],    // South Africa ↔ Indian Ocean
-  ['RED_GULF', 'INDIAN'],    // Gulf ↔ India
-  ['RED_GULF', 'E_AFR'],     // Gulf ↔ East Africa
-  ['INDIAN',   'ASIA'],      // India ↔ Asia
-  ['ASIA',     'PAC_AMER'],  // Transpacific
-  ['ATL_AMER', 'PAC_AMER'],  // Panama corridor
+  ['ATL_EUR',    'E_MED'],       // Med ↔ North Sea/Atlantic
+  ['ATL_EUR',    'W_AFR'],       // Europe ↔ West Africa
+  ['ATL_EUR',    'N_ATL_AMER'],  // Transatlantic (Europe ↔ US/Caribbean)
+  ['ATL_EUR',    'S_ATL_AMER'],  // Europe ↔ South America
+  ['E_MED',      'RED_GULF'],    // Suez connection
+  ['E_MED',      'W_AFR'],       // Med ↔ West Africa
+  ['W_AFR',      'N_ATL_AMER'],  // West Africa ↔ North Americas
+  ['W_AFR',      'S_ATL_AMER'],  // West Africa ↔ South Americas
+  ['W_AFR',      'S_AFR'],       // West ↔ South Africa
+  ['S_AFR',      'E_AFR'],       // South ↔ East Africa
+  ['S_AFR',      'INDIAN'],      // South Africa ↔ Indian Ocean
+  ['RED_GULF',   'INDIAN'],      // Gulf ↔ India
+  ['RED_GULF',   'E_AFR'],       // Gulf ↔ East Africa
+  ['INDIAN',     'ASIA'],        // India ↔ Asia
+  ['N_ATL_AMER', 'S_ATL_AMER'],  // North ↔ South America
+  ['ASIA',       'PAC_AMER'],    // Transpacific
+  ['PAC_AMER',   'S_ATL_AMER'],  // Pacific Americas ↔ South Atlantic
+  ['N_ATL_AMER', 'PAC_AMER'],    // Panama corridor
 ];
 
 function corridorOf(region){
