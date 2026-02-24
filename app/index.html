@@ -815,6 +815,8 @@ function matchLive(oR, dR, vt){
     if(s > bestScore){ bestScore = s; best = r; }
   }
 
+  console.log(`[matchLive] ${oR}→${dR} ${vt}: ${LIVE_RATES.length} rates checked, best score=${bestScore.toFixed(1)}, rate=${best?.rate}, threshold=45`);
+
   // Threshold: effective score must be at least 45 to use
   if(!best || bestScore < 45) return null;
 
@@ -917,7 +919,7 @@ async function loadData(){
       fetchJSON('./data/fixtures.json'),
       fetchJSON('./data/regions.json'),
       fetchJSON('./data/commodities.json'),
-      fetchJSON('/api/rates', 5000),
+      fetchJSON('/api/rates', 12000),
     ]);
 
     // Core data — these are required
@@ -953,8 +955,11 @@ async function loadData(){
     if(liveData && liveData.success && liveData.rates && liveData.rates.length > 0){
       LIVE_RATES = liveData.rates;
       console.log(`[DryFreight] Live rates loaded: ${LIVE_RATES.length} routes`);
+      // Log a sample to verify region format
+      const sample = LIVE_RATES.slice(0,3).map(r=>`${r.vesselType} ${r.originRegion}→${r.destinationRegion} $${r.rate}`);
+      console.log('[DryFreight] Sample rates:', sample.join(' | '));
     } else {
-      console.log('[DryFreight] Live rates unavailable — using hardcoded fixtures');
+      console.warn('[DryFreight] Live rates unavailable. liveData:', JSON.stringify(liveData)?.slice(0,200));
     }
 
     // Bunker prices — non-fatal if missing
