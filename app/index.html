@@ -637,39 +637,185 @@ function vesselForCargo(mt){
   return VESSEL_RANGES[VESSEL_RANGES.length-1];
 }
 
-// ── Region neighbours for fuzzy matching ───────────
-// Used by both live and fixture matching
-function regionNeighbours(r){ return RN[r] || []; }
+// ══════════════════════════════════════════════════
+// TC RATE MATCHING — CORRIDOR-BASED SYSTEM
+//
+// Shipping operates in trade corridors, not isolated
+// regions. A vessel fixing N.Europe → ECSA competes
+// in the same market as W.Med → ECSA. But it tells
+// us nothing about W.Med → N.Europe (opposite leg).
+//
+// Scoring model (max 100 before freshness):
+//   Origin corridor match:
+//     exact region   = 40
+//     same corridor  = 30   (e.g. W.MED & N.EUROPE both ATL_EUR)
+//     adj corridor   = 12   (e.g. ATL_EUR & E_MED are adjacent)
+//     else           =  0
+//   Destination corridor match: same scale (40/30/12/0)
+//   Vessel match:
+//     exact          = 20
+//     1 size step    = 10   (e.g. Handy ↔ Supramax)
+//     2 size steps   =  3   (e.g. Handy ↔ Ultramax)
+//     3+ steps       =  0   (e.g. Handy ↔ Panamax)
+//
+//   Direction penalty: if fixture is the REVERSE of
+//   our voyage (origin ≈ our dest AND dest ≈ our
+//   origin), multiply total by 0.15 — backhaul rates
+//   are structurally different and should almost never
+//   be used.
+//
+//   Freshness factor: tier1=1.0, tier2=0.9, tier3=0.75
+//   Multiply raw score to get effective score.
+//
+//   Minimum threshold: effective score < 45 → reject,
+//   fall back to hardcoded fixture.
+// ══════════════════════════════════════════════════
 
-// ── Score how well two regions match ───────────────
-function regionScore(a, b){
-  if(a===b) return 40;
-  if(regionNeighbours(a).includes(b)) return 20;
-  if(regionNeighbours(b).includes(a)) return 12;
+// Region → corridor mapping
+const CORRIDOR = {
+  'N.EUROPE':      'ATL_EUR',
+  'BALTIC':        'ATL_EUR',
+  'W.MED':         'ATL_EUR',
+  'E.MED':         'E_MED',
+  'BLACK SEA':     'E_MED',
+  'W.AFRICA':      'W_AFR',
+  'S.AFRICA':      'S_AFR',
+  'E.AFRICA':      'E_AFR',
+  'RED SEA':       'RED_GULF',
+  'MIDDLE EAST':   'RED_GULF',
+  'W.INDIA':       'INDIAN',
+  'E.INDIA':       'INDIAN',
+  'S.INDIA':       'INDIAN',
+  'SE.ASIA':       'ASIA',
+  'CHINA':         'ASIA',
+  'N.ASIA':        'ASIA',
+  'AUSTRALIA':     'ASIA',
+  'US GULF':       'ATL_AMER',
+  'US EAST COAST': 'ATL_AMER',
+  'E.S.AMERICA':   'ATL_AMER',
+  'N.S.AMERICA':   'ATL_AMER',
+  'CARIBBEAN':     'ATL_AMER',
+  'MEXICO':        'ATL_AMER',
+  'W.S.AMERICA':   'PAC_AMER',
+  'E.N.AMERICA':   'ATL_AMER',
+};
+
+// Adjacent corridor pairs (bidirectional)
+const CORRIDOR_ADJ = [
+  ['ATL_EUR',  'E_MED'],     // Med ↔ North Sea/Atlantic
+  ['ATL_EUR',  'W_AFR'],     // Europe ↔ West Africa
+  ['ATL_EUR',  'ATL_AMER'],  // Transatlantic
+  ['E_MED',    'RED_GULF'],  // Suez connection
+  ['E_MED',    'W_AFR'],     // Med ↔ West Africa
+  ['W_AFR',    'ATL_AMER'],  // West Africa ↔ Americas
+  ['W_AFR',    'S_AFR'],     // West ↔ South Africa
+  ['S_AFR',    'E_AFR'],     // South ↔ East Africa
+  ['S_AFR',    'INDIAN'],    // South Africa ↔ Indian Ocean
+  ['RED_GULF', 'INDIAN'],    // Gulf ↔ India
+  ['RED_GULF', 'E_AFR'],     // Gulf ↔ East Africa
+  ['INDIAN',   'ASIA'],      // India ↔ Asia
+  ['ASIA',     'PAC_AMER'],  // Transpacific
+  ['ATL_AMER', 'PAC_AMER'],  // Panama corridor
+];
+
+function corridorOf(region){
+  return CORRIDOR[region] || region;
+}
+
+function corridorsAdjacent(cA, cB){
+  for(const [x,y] of CORRIDOR_ADJ){
+    if((x===cA&&y===cB)||(x===cB&&y===cA)) return true;
+  }
+  return false;
+}
+
+// Score how well a fixture region matches our target region
+function corridorScore(fixtureRegion, targetRegion){
+  if(fixtureRegion === targetRegion)                return 40; // exact region
+  const fC = corridorOf(fixtureRegion);
+  const tC = corridorOf(targetRegion);
+  if(fC === tC)                                     return 30; // same corridor
+  if(corridorsAdjacent(fC, tC))                     return 12; // adjacent corridor
   return 0;
 }
 
+// Vessel size order for step-distance calculation
+const VESSEL_ORDER = ['HANDY','SUPRAMAX','ULTRAMAX','PANAMAX','CAPESIZE'];
+
+function vesselScore(fixtureVt, targetVt){
+  const a = VESSEL_ORDER.indexOf(fixtureVt);
+  const b = VESSEL_ORDER.indexOf(targetVt);
+  if(a < 0 || b < 0) return (fixtureVt === targetVt) ? 20 : 0;
+  const steps = Math.abs(a - b);
+  if(steps === 0) return 20;
+  if(steps === 1) return 10;
+  if(steps === 2) return  3;
+  return 0;
+}
+
+// Is this fixture approximately the reverse of our voyage?
+// Only flag as reverse if corridors match exactly AND
+// the origin and destination corridors are different
+// (intra-corridor voyages can't have a meaningful "reverse").
+function isReverse(fOrig, fDest, oR, dR){
+  const foC = corridorOf(fOrig), fdC = corridorOf(fDest);
+  const oC  = corridorOf(oR),    dC  = corridorOf(dR);
+  if(oC === dC) return false; // same corridor voyage — no reverse concept
+  return (foC === dC) && (fdC === oC);
+}
+
+// Freshness multiplier by tier
+function freshnessFactor(tier){
+  if(tier === 1) return 1.00;
+  if(tier === 2) return 0.90;
+  if(tier === 3) return 0.75;
+  return 0.60;
+}
+
+// Score a single fixture/rate candidate against our voyage
+function scoreCandidate(candOrig, candDest, candVt, candTier, oR, dR, vt){
+  const oScore = corridorScore(candOrig, oR);
+  const dScore = corridorScore(candDest, dR);
+  const vScore = vesselScore(candVt, vt);
+
+  // If both origin and destination score zero, this fixture is useless
+  if(oScore === 0 && dScore === 0) return 0;
+
+  let raw = oScore + dScore + vScore;
+
+  // Heavy penalty for reverse direction
+  if(isReverse(candOrig, candDest, oR, dR)) raw *= 0.15;
+
+  return raw * freshnessFactor(candTier);
+}
+
 // ── Match against LIVE_RATES (scraped from HandyBulk) ──
-// Returns best live match with its confidence score,
-// or null if nothing useful found.
 function matchLive(oR, dR, vt){
   let best = null, bestScore = 0;
+
   for(const r of LIVE_RATES){
-    let s = 0;
-    s += regionScore(r.originRegion, oR);
-    s += regionScore(r.destinationRegion, dR);
-    // Vessel type
-    if(r.vesselType === vt) s += 20;
-    else s += 3; // slight credit for any live rate
+    const s = scoreCandidate(
+      r.originRegion, r.destinationRegion, r.vesselType,
+      r.tier, oR, dR, vt
+    );
     if(s > bestScore){ bestScore = s; best = r; }
   }
-  if(!best || bestScore < 15) return null; // not confident enough
 
-  // Adjust confidence downward for non-exact matches
-  let conf = best.confidence;
-  if(best.originRegion !== oR || best.destinationRegion !== dR) conf = Math.round(conf * 0.75);
-  if(best.vesselType   !== vt)                                  conf = Math.round(conf * 0.85);
-  conf = Math.max(conf, 15);
+  // Threshold: effective score must be at least 45 to use
+  if(!best || bestScore < 45) return null;
+
+  // Base confidence from freshness, then scale by match quality
+  // Perfect match (100 raw × 1.0 fresh) = keeps tier confidence
+  // Partial match scales down proportionally
+  const matchQuality = Math.min(bestScore / 100, 1.0);
+  let conf = Math.round(best.confidence * matchQuality);
+  conf = Math.max(conf, 20);
+
+  // Build a human-readable match note
+  const oExact = best.originRegion      === oR ? '✓' : '~';
+  const dExact = best.destinationRegion === dR ? '✓' : '~';
+  const vExact = best.vesselType        === vt ? '✓' : '~';
+  const age    = best.daysOld === 0 ? 'today' : best.daysOld + 'd old';
 
   return {
     rate:        best.rate,
@@ -679,29 +825,29 @@ function matchLive(oR, dR, vt){
     scrapedDate: best.scrapedDate,
     rawLine:     best.rawLine,
     source:      'live',
-    matchNote:   best.vesselType+' '+best.originRegion+' → '+best.destinationRegion
-                 +' ('+best.daysOld+'d old)',
+    matchNote:   `${best.vesselType}${vExact} ${best.originRegion}${oExact}→${best.destinationRegion}${dExact} (${age}, score:${Math.round(bestScore)})`,
   };
 }
 
 // ── Match against hardcoded FIXTURES (fallback) ────
 function matchFixture(oR, dR, vt){
-  let best=null, bsc=0, bestF=null;
+  let best = null, bestScore = 0, bestF = null;
+
   for(const f of FIXTURES){
-    let s=0;
-    s += regionScore(f.oR, oR);
-    s += regionScore(f.dR, dR);
-    if(f.vt===vt) s+=20; else s+=5;
-    if(s>bsc){bsc=s; best=f.rate; bestF=f;}
+    const s = scoreCandidate(f.oR, f.dR, f.vt, 4, oR, dR, vt);
+    if(s > bestScore){ bestScore = s; best = f.rate; bestF = f; }
   }
+
   return {
-    rate:       best||15000,
-    confidence: 30,
-    tier:       4,
-    daysOld:    null,
-    scrapedDate:null,
-    source:     'fixture',
-    matchNote:  bestF ? bestF.vt+' '+bestF.oR+' → '+bestF.dR+' (hardcoded)' : 'default fallback',
+    rate:        best || 15000,
+    confidence:  Math.min(30, Math.round(bestScore * 0.3)),
+    tier:        4,
+    daysOld:     null,
+    scrapedDate: null,
+    source:      'fixture',
+    matchNote:   bestF
+      ? `${bestF.vt} ${bestF.oR}→${bestF.dR} (hardcoded, score:${Math.round(bestScore)})`
+      : 'default fallback',
   };
 }
 
@@ -712,13 +858,13 @@ function matchTC(oR, dR, vt){
   const fixture = matchFixture(oR, dR, vt);
   const result  = live || fixture;
   return {
-    rate:       result.rate,
-    confidence: result.confidence,
-    tier:       result.tier,
-    daysOld:    result.daysOld,
-    scrapedDate:result.scrapedDate,
-    source:     result.source,
-    matchNote:  result.matchNote,
+    rate:        result.rate,
+    confidence:  result.confidence,
+    tier:        result.tier,
+    daysOld:     result.daysOld,
+    scrapedDate: result.scrapedDate,
+    source:      result.source,
+    matchNote:   result.matchNote,
   };
 }
 
