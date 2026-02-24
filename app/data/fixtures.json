@@ -1,274 +1,37 @@
 {
-  "fixtures": [
-    {
-      "vt": "HANDY",
-      "oR": "N.EUROPE",
-      "dR": "E.S.AMERICA",
-      "rate": 8500
-    },
-    {
-      "vt": "HANDY",
-      "oR": "E.S.AMERICA",
-      "dR": "N.EUROPE",
-      "rate": 23500
-    },
-    {
-      "vt": "HANDY",
-      "oR": "US GULF",
-      "dR": "N.EUROPE",
-      "rate": 24500
-    },
-    {
-      "vt": "HANDY",
-      "oR": "SE.ASIA",
-      "dR": "CHINA",
-      "rate": 9000
-    },
-    {
-      "vt": "HANDY",
-      "oR": "CHINA",
-      "dR": "SE.ASIA",
-      "rate": 8500
-    },
-    {
-      "vt": "HANDY",
-      "oR": "E.S.AMERICA",
-      "dR": "W.MED",
-      "rate": 20000
-    },
-    {
-      "vt": "SUPRAMAX",
-      "oR": "N.EUROPE",
-      "dR": "CHINA",
-      "rate": 17000
-    },
-    {
-      "vt": "SUPRAMAX",
-      "oR": "BLACK SEA",
-      "dR": "CHINA",
-      "rate": 17000
-    },
-    {
-      "vt": "SUPRAMAX",
-      "oR": "E.MED",
-      "dR": "CHINA",
-      "rate": 17000
-    },
-    {
-      "vt": "SUPRAMAX",
-      "oR": "US GULF",
-      "dR": "CHINA",
-      "rate": 27000
-    },
-    {
-      "vt": "SUPRAMAX",
-      "oR": "US GULF",
-      "dR": "N.EUROPE",
-      "rate": 26000
-    },
-    {
-      "vt": "SUPRAMAX",
-      "oR": "W.AFRICA",
-      "dR": "CHINA",
-      "rate": 20500
-    },
-    {
-      "vt": "SUPRAMAX",
-      "oR": "W.AFRICA",
-      "dR": "N.EUROPE",
-      "rate": 17000
-    },
-    {
-      "vt": "SUPRAMAX",
-      "oR": "CHINA",
-      "dR": "AUSTRALIA",
-      "rate": 11500
-    },
-    {
-      "vt": "SUPRAMAX",
-      "oR": "E.S.AMERICA",
-      "dR": "CHINA",
-      "rate": 21000
-    },
-    {
-      "vt": "ULTRAMAX",
-      "oR": "N.EUROPE",
-      "dR": "CHINA",
-      "rate": 17500
-    },
-    {
-      "vt": "ULTRAMAX",
-      "oR": "BLACK SEA",
-      "dR": "CHINA",
-      "rate": 17500
-    },
-    {
-      "vt": "ULTRAMAX",
-      "oR": "US GULF",
-      "dR": "CHINA",
-      "rate": 27500
-    },
-    {
-      "vt": "ULTRAMAX",
-      "oR": "US GULF",
-      "dR": "N.EUROPE",
-      "rate": 26500
-    },
-    {
-      "vt": "ULTRAMAX",
-      "oR": "E.S.AMERICA",
-      "dR": "E.MED",
-      "rate": 26500
-    },
-    {
-      "vt": "ULTRAMAX",
-      "oR": "E.S.AMERICA",
-      "dR": "CHINA",
-      "rate": 21000
-    },
-    {
-      "vt": "ULTRAMAX",
-      "oR": "E.S.AMERICA",
-      "dR": "N.EUROPE",
-      "rate": 23500
-    },
-    {
-      "vt": "ULTRAMAX",
-      "oR": "N.ASIA",
-      "dR": "W.MED",
-      "rate": 12500
-    },
-    {
-      "vt": "PANAMAX",
-      "oR": "N.EUROPE",
-      "dR": "CHINA",
-      "rate": 22000
-    },
-    {
-      "vt": "PANAMAX",
-      "oR": "E.S.AMERICA",
-      "dR": "N.ASIA",
-      "rate": 17500
-    },
-    {
-      "vt": "PANAMAX",
-      "oR": "US GULF",
-      "dR": "N.EUROPE",
-      "rate": 18500
-    },
-    {
-      "vt": "PANAMAX",
-      "oR": "US GULF",
-      "dR": "CHINA",
-      "rate": 29000
-    },
-    {
-      "vt": "PANAMAX",
-      "oR": "BLACK SEA",
-      "dR": "CHINA",
-      "rate": 19500
-    },
-    {
-      "vt": "PANAMAX",
-      "oR": "AUSTRALIA",
-      "dR": "CHINA",
-      "rate": 8500
-    },
-    {
-      "vt": "CAPESIZE",
-      "oR": "AUSTRALIA",
-      "dR": "CHINA",
-      "rate": 9500
-    },
-    {
-      "vt": "CAPESIZE",
-      "oR": "BRAZIL",
-      "dR": "CHINA",
-      "rate": 22000
-    },
-    {
-      "vt": "CAPESIZE",
-      "oR": "E.S.AMERICA",
-      "dR": "CHINA",
-      "rate": 22000
-    },
-    {
-      "vt": "CAPESIZE",
-      "oR": "W.AFRICA",
-      "dR": "CHINA",
-      "rate": 17000
-    },
-    {
-      "vt": "CAPESIZE",
-      "oR": "N.EUROPE",
-      "dR": "CHINA",
-      "rate": 24000
-    }
-  ],
-  "regionNeighbours": {
-    "N.EUROPE": [
-      "N.EUROPE",
-      "BALTIC"
-    ],
-    "BALTIC": [
-      "BALTIC",
-      "N.EUROPE"
-    ],
-    "W.MED": [
-      "W.MED",
-      "E.MED"
-    ],
-    "E.MED": [
-      "E.MED",
-      "W.MED",
-      "BLACK SEA"
-    ],
-    "BLACK SEA": [
-      "BLACK SEA",
-      "E.MED"
-    ],
-    "US GULF": [
-      "US GULF",
-      "US EAST COAST"
-    ],
-    "US EAST COAST": [
-      "US EAST COAST",
-      "US GULF"
-    ],
-    "E.S.AMERICA": [
-      "E.S.AMERICA",
-      "N.S.AMERICA"
-    ],
-    "N.S.AMERICA": [
-      "N.S.AMERICA",
-      "E.S.AMERICA"
-    ],
-    "W.INDIA": [
-      "W.INDIA",
-      "E.INDIA"
-    ],
-    "E.INDIA": [
-      "E.INDIA",
-      "W.INDIA"
-    ],
-    "SE.ASIA": [
-      "SE.ASIA",
-      "CHINA",
-      "N.ASIA"
-    ],
-    "CHINA": [
-      "CHINA",
-      "N.ASIA",
-      "SE.ASIA"
-    ],
-    "N.ASIA": [
-      "N.ASIA",
-      "CHINA",
-      "SE.ASIA"
-    ],
-    "AUSTRALIA": [
-      "AUSTRALIA",
-      "N.ASIA"
-    ]
-  }
+  "lanes": [
+    { "vt": "HANDY",    "oR": "N.EUROPE",    "dR": "E.S.AMERICA" },
+    { "vt": "HANDY",    "oR": "E.S.AMERICA", "dR": "N.EUROPE"    },
+    { "vt": "HANDY",    "oR": "US GULF",      "dR": "N.EUROPE"    },
+    { "vt": "HANDY",    "oR": "SE.ASIA",      "dR": "CHINA"       },
+    { "vt": "HANDY",    "oR": "CHINA",        "dR": "SE.ASIA"     },
+    { "vt": "HANDY",    "oR": "E.S.AMERICA",  "dR": "W.MED"       },
+    { "vt": "SUPRAMAX", "oR": "N.EUROPE",     "dR": "CHINA"       },
+    { "vt": "SUPRAMAX", "oR": "BLACK SEA",    "dR": "CHINA"       },
+    { "vt": "SUPRAMAX", "oR": "E.MED",        "dR": "CHINA"       },
+    { "vt": "SUPRAMAX", "oR": "US GULF",      "dR": "CHINA"       },
+    { "vt": "SUPRAMAX", "oR": "US GULF",      "dR": "N.EUROPE"    },
+    { "vt": "SUPRAMAX", "oR": "W.AFRICA",     "dR": "CHINA"       },
+    { "vt": "SUPRAMAX", "oR": "W.AFRICA",     "dR": "N.EUROPE"    },
+    { "vt": "SUPRAMAX", "oR": "CHINA",        "dR": "AUSTRALIA"   },
+    { "vt": "SUPRAMAX", "oR": "E.S.AMERICA",  "dR": "CHINA"       },
+    { "vt": "ULTRAMAX", "oR": "N.EUROPE",     "dR": "CHINA"       },
+    { "vt": "ULTRAMAX", "oR": "BLACK SEA",    "dR": "CHINA"       },
+    { "vt": "ULTRAMAX", "oR": "US GULF",      "dR": "CHINA"       },
+    { "vt": "ULTRAMAX", "oR": "US GULF",      "dR": "N.EUROPE"    },
+    { "vt": "ULTRAMAX", "oR": "E.S.AMERICA",  "dR": "E.MED"       },
+    { "vt": "ULTRAMAX", "oR": "E.S.AMERICA",  "dR": "CHINA"       },
+    { "vt": "ULTRAMAX", "oR": "E.S.AMERICA",  "dR": "N.EUROPE"    },
+    { "vt": "ULTRAMAX", "oR": "N.ASIA",       "dR": "W.MED"       },
+    { "vt": "PANAMAX",  "oR": "N.EUROPE",     "dR": "CHINA"       },
+    { "vt": "PANAMAX",  "oR": "E.S.AMERICA",  "dR": "N.ASIA"      },
+    { "vt": "PANAMAX",  "oR": "US GULF",      "dR": "N.EUROPE"    },
+    { "vt": "PANAMAX",  "oR": "US GULF",      "dR": "CHINA"       },
+    { "vt": "PANAMAX",  "oR": "BLACK SEA",    "dR": "CHINA"       },
+    { "vt": "PANAMAX",  "oR": "AUSTRALIA",    "dR": "CHINA"       },
+    { "vt": "CAPESIZE", "oR": "AUSTRALIA",    "dR": "CHINA"       },
+    { "vt": "CAPESIZE", "oR": "E.S.AMERICA",  "dR": "CHINA"       },
+    { "vt": "CAPESIZE", "oR": "W.AFRICA",     "dR": "CHINA"       },
+    { "vt": "CAPESIZE", "oR": "N.EUROPE",     "dR": "CHINA"       }
+  ]
 }

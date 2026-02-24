@@ -542,8 +542,8 @@ header{border-bottom:1px solid #1e1e2a;padding-bottom:16px;margin-bottom:28px;di
 let PORTS        = [];
 let VESSEL_SPECS = {};
 let VESSEL_RANGES= [];
-let FIXTURES     = [];
-let RN           = {};
+let LANES         = [];   // trade lane structure from fixtures.json (no rates)
+
 let DA           = {};
 let PORT_RATE    = {};
 let ECA          = new Set();
@@ -843,42 +843,53 @@ function matchLive(oR, dR, vt){
   };
 }
 
-// ── Match against hardcoded FIXTURES (fallback) ────
-function matchFixture(oR, dR, vt){
-  let best = null, bestScore = 0, bestF = null;
-
-  for(const f of FIXTURES){
-    const s = scoreCandidate(f.oR, f.dR, f.vt, 4, oR, dR, vt);
-    if(s > bestScore){ bestScore = s; best = f.rate; bestF = f; }
+// ── Find best matching trade lane (no rates — structure only) ──
+// LANES is the list of known trade corridors from fixtures.json.
+// We use it only to identify the closest structural match and
+// produce a descriptive note — never to supply a rate value.
+function bestLaneMatch(oR, dR, vt){
+  let best = null, bestScore = 0;
+  for(const lane of LANES){
+    const s = scoreCandidate(lane.oR, lane.dR, lane.vt, 1, oR, dR, vt);
+    if(s > bestScore){ bestScore = s; best = lane; }
   }
-
-  return {
-    rate:        best || 15000,
-    confidence:  Math.min(30, Math.round(bestScore * 0.3)),
-    tier:        4,
-    daysOld:     null,
-    scrapedDate: null,
-    source:      'fixture',
-    matchNote:   bestF
-      ? `${bestF.vt} ${bestF.oR}→${bestF.dR} (hardcoded, score:${Math.round(bestScore)})`
-      : 'default fallback',
-  };
+  return best ? { lane: best, score: bestScore } : null;
 }
 
 // ── Main TC rate lookup ─────────────────────────────
-// Tries live rates first, falls back to fixtures.
+// Tries live scraped rates first.
+// If no live match found, returns noData=true so the
+// UI prompts the user to enter the rate manually.
+// No hardcoded rate values — ever.
 function matchTC(oR, dR, vt){
-  const live    = matchLive(oR, dR, vt);
-  const fixture = matchFixture(oR, dR, vt);
-  const result  = live || fixture;
+  const live = matchLive(oR, dR, vt);
+
+  if(live){
+    return {
+      rate:        live.rate,
+      confidence:  live.confidence,
+      tier:        live.tier,
+      daysOld:     live.daysOld,
+      scrapedDate: live.scrapedDate,
+      source:      'live',
+      matchNote:   live.matchNote,
+      noData:      false,
+    };
+  }
+
+  // No live match — identify closest lane for context only
+  const lm = bestLaneMatch(oR, dR, vt);
   return {
-    rate:        result.rate,
-    confidence:  result.confidence,
-    tier:        result.tier,
-    daysOld:     result.daysOld,
-    scrapedDate: result.scrapedDate,
-    source:      result.source,
-    matchNote:   result.matchNote,
+    rate:        null,
+    confidence:  0,
+    tier:        null,
+    daysOld:     null,
+    scrapedDate: null,
+    source:      'nodata',
+    matchNote:   lm
+      ? `Closest lane: ${lm.lane.vt} ${lm.lane.oR}→${lm.lane.dR} (score:${Math.round(lm.score)})`
+      : 'No matching lane found',
+    noData:      true,
   };
 }
 
@@ -911,15 +922,13 @@ async function loadData(){
 
     // Core data — these are required
     if(!portsData || !vesselsData || !fixturesData || !regionsData){
-      throw new Error('Failed to load core data files. Check that ports.json, vessels.json, fixtures.json and regions.json exist in app/data/');
+      throw new Error('Failed to load core data files.');
     }
 
-    // Populate globals
     PORTS         = portsData;
     VESSEL_SPECS  = vesselsData.specs;
     VESSEL_RANGES = vesselsData.ranges;
-    FIXTURES      = fixturesData.fixtures;
-    RN            = fixturesData.regionNeighbours;
+    LANES         = fixturesData.lanes || [];
     DA            = regionsData.da;
     PORT_RATE     = regionsData.portRate;
     ECA           = new Set(regionsData.ecaRegions);
@@ -1460,7 +1469,7 @@ function doCalc(){
     canals: C.canals,
     warZones: C.warZones,
     tcMatch: C.tcMatch,
-    tcRate: C.tcRate,
+    tcRate: C.tcRate || 0,   // 0 when noData — user must fill in
     ladenKn: C.sp.ladenKn,
     ballKn: C.sp.ballKn,
     wxFactor: 1.05,
@@ -1506,30 +1515,41 @@ function doCalc(){
     const noteEl = document.getElementById('o-tcnote');
     if(!noteEl) return;
 
-    // Confidence colour
-    const col = m.confidence >= 80 ? '#90d060'   // green  — Tier 1 live
-              : m.confidence >= 60 ? '#f5c842'   // yellow — Tier 2 live
-              : m.confidence >= 40 ? '#e07820'   // orange — Tier 3 / near match
-              :                      '#666';     // grey   — fixture fallback
-
-    let label = '';
-    if(m.source === 'live'){
+    if(m.noData){
+      // No live rate available — prompt user to enter manually
+      noteEl.innerHTML =
+        `<span style="color:#e07820;font-weight:700">⚠ No live rate found</span>`
+        + `&nbsp;&nbsp;Enter TC rate manually below`
+        + `<br><span style="color:#555;font-size:10px">${m.matchNote}</span>`;
+    } else {
+      const col = m.confidence >= 80 ? '#90d060'
+                : m.confidence >= 60 ? '#f5c842'
+                : m.confidence >= 40 ? '#e07820'
+                :                      '#888';
       const d = m.daysOld === 0 ? 'today'
               : m.daysOld === 1 ? '1 day ago'
               : m.daysOld + ' days ago';
-      label = `Market rate scraped ${d}`;
-    } else {
-      label = 'Hardcoded reference rate';
+      noteEl.innerHTML =
+        `<span style="color:${col};font-weight:700">${m.confidence}/100</span>`
+        + `&nbsp;&nbsp;Market rate scraped ${d}`
+        + `<br><span style="color:#444;font-size:10px">${m.matchNote}</span>`;
     }
-
-    noteEl.innerHTML =
-      `<span style="color:${col};font-weight:700">${m.confidence}/100</span>`
-      + `&nbsp;&nbsp;${label}`
-      + `<br><span style="color:#444;font-size:10px">${m.matchNote}</span>`;
   })();
 
   // Populate editable inputs
-  setInput('p-tcrate',    C.tcRate);
+  // If no live TC rate, leave field empty so user must enter manually
+  const tcInput = document.getElementById('p-tcrate');
+  if(tcInput){
+    if(C.tcMatch.noData){
+      tcInput.value = '';
+      tcInput.placeholder = 'Enter rate…';
+      tcInput.style.borderColor = '#e07820';
+    } else {
+      tcInput.value = C.tcRate;
+      tcInput.placeholder = '';
+      tcInput.style.borderColor = '';
+    }
+  }
   setInput('p-ladenspd',  C.sp.ladenKn);
   setInput('p-ballspd',   C.sp.ballKn);
   setInput('p-wx',        1.05);
