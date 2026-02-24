@@ -1314,16 +1314,16 @@ function doCalc(){
 
   // Update ballast factor note to show discharge region
   const ballNote = document.getElementById('o-ballnote');
-  if(ballNote) ballNote.textContent = dp.region + ' discharge region';
+  if(ballNote) ballNote.textContent = portSel.disch.region + ' discharge region';
 
   // Update load/discharge rate notes to show commodity + source
   const commLabel = (COMMODITIES[C.commodity]||{}).label || 'Default';
   const lRateNote = document.getElementById('o-lratenote');
   const dRateNote = document.getElementById('o-dratenote');
-  const portOverrideL = PORT_RATES_COMM[lp.name];
-  const portOverrideD = PORT_RATES_COMM[dp.name];
-  if(lRateNote) lRateNote.textContent = (portOverrideL ? lp.name + ' terminal rate' : lp.region + ' regional rate') + ' · ' + commLabel;
-  if(dRateNote) dRateNote.textContent = (portOverrideD ? dp.name + ' terminal rate' : dp.region + ' regional rate') + ' · ' + commLabel;
+  const portOverrideL = PORT_RATES_COMM[portSel.load.name];
+  const portOverrideD = PORT_RATES_COMM[portSel.disch.name];
+  if(lRateNote) lRateNote.textContent = (portOverrideL ? portSel.load.name + ' terminal rate' : portSel.load.region + ' regional rate') + ' · ' + commLabel;
+  if(dRateNote) dRateNote.textContent = (portOverrideD ? portSel.disch.name + ' terminal rate' : portSel.disch.region + ' regional rate') + ' · ' + commLabel;
 
   // Handle canal section
   const sec4=document.getElementById('sec4');
